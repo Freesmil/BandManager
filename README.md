@@ -5,7 +5,7 @@
 * Tomáš Ševčovič
 * Lenka Svetlovská
 * Peter Sekan
-* Martin Gazdag?
+* Martin Gazdag
 
 ## Zadání
   Cílem projektu je implementovat webový informační systém pro katalog kapel.
