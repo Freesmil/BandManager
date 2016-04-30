@@ -1,13 +1,11 @@
 package cz.muni.fi.pv168.bandsproject;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
+import org.xmldb.api.base.Collection;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -19,14 +17,24 @@ import static org.junit.Assert.*;
  *
  * @author Tomas
  */
-@RunWith(SpringJUnit4ClassRunner.class) //Spring se zúčastní unit testů
-@ContextConfiguration(classes = {MySpringTestConfig.class}) //konfigurace je ve třídě MySpringTestConfig
-@Transactional //každý test poběží ve vlastní transakci, která bude na konci rollbackována
 public class CustomerManagerImplTest {
-    @Autowired
-    private CustomerManager customerManager;
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    private CustomerManagerImpl customerManager;
+    private Collection collection;
+
+    @Before
+    public void setUp() throws Exception {
+        collection = DBUtils.loadOrCreateCustomerCollection();
+        customerManager = new CustomerManagerImpl(collection);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        DBUtils.dropCustomerDatabase();
+        collection.close();
+    }
 
     @Test
     public void createCustomer() {

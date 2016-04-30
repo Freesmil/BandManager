@@ -1,6 +1,6 @@
 package cz.muni.fi.pv168.bandsproject;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Created by Lenka on 9.3.2016.
@@ -15,5 +15,5 @@ public interface CustomerManager {
 
     public Customer getCustomer(Long id);
     
-    public List<Customer> getAllCustomers();
+    public Collection<Customer> getAllCustomers();
 }

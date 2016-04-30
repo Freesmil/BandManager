@@ -153,7 +153,7 @@ public class LeaseManagerImpl implements LeaseManager{
             Lease lease = new Lease();
             lease.setId(rs.getLong("id"));
             lease.setBand(new BandManagerImpl(dataSource).findBandById(rs.getLong("idBand")));
-            lease.setCustomer(new CustomerManagerImpl(dataSource).getCustomer(rs.getLong("idCustomer")));
+            //lease.setCustomer(new CustomerManagerImpl(dataSource).getCustomer(rs.getLong("idCustomer")));
             lease.setDate(rs.getTimestamp("date"));
             lease.setPlace(Region.values()[rs.getInt("region")]);
             lease.setDuration(rs.getInt("duration"));
