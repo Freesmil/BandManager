@@ -48,8 +48,8 @@ public class MySpringTestConfig {
 
     @Bean
     public BandManager bandManager() {
-        // BookManagerImpl nepoužívá Spring JDBC, musíme mu vnutit spolupráci se Spring transakcemi !
-        return new BandManagerImpl(new TransactionAwareDataSourceProxy(dataSource()));
+        // BandManagerImpl nepoužívá Spring JDBC, musíme mu vnutit spolupráci se Spring transakcemi !
+        return null; //new BandManagerImpl(new TransactionAwareDataSourceProxy(dataSource()));
     }
 
     @Bean

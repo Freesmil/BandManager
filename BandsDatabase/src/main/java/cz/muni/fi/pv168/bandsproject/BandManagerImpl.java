@@ -1,209 +1,356 @@
 package cz.muni.fi.pv168.bandsproject;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
-import javax.sql.DataSource;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.Map;
 
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.xmldb.api.base.*;
+import sun.tools.jar.Main;
+import org.exist.xmldb.XQueryService;
+import java.util.Collection;
 
 /**
  * Created by Lenka on 9.3.2016.
  */
 public class BandManagerImpl implements BandManager{
-    private final DataSource dataSource;
-    private JdbcTemplate jdbcTemplateObject;
-    
-    public BandManagerImpl(DataSource dataSource) {
-        this.dataSource = dataSource;
-        this.jdbcTemplateObject = new JdbcTemplate(dataSource);
+    private org.xmldb.api.base.Collection collection;
+
+    public BandManagerImpl(org.xmldb.api.base.Collection collection) {
+        this.collection = collection;
     }
 
+    private static final Logger log = Logger.getLogger(Main.class.getName());
+
+
     @Override
-    public void createBand(Band band) throws ServiceFailureException { 
-        validate(band);
-        if (band.getId() != null) {
-            throw new IllegalArgumentException("band id is already set");
+    public void createBand(Band band) throws ServiceFailureException {
+        validate(band);log.log(Level.INFO, "Create band in band manager: " + band);
+        if(band.getId() != null){
+            log.log(Level.SEVERE, "Band exception: Band id must be null");
+            throw new BandException("Band id must be null");
         }
-        SimpleJdbcInsert insertBand = new SimpleJdbcInsert(jdbcTemplateObject).withTableName("band").usingGeneratedKeyColumns("id");
-        Map<String, Object> parameters = new HashMap<>(2);
-        parameters.put("name", band.getName());
-        parameters.put("region", band.getRegion().ordinal());
-        parameters.put("pricePerHour", band.getPricePerHour());
-        parameters.put("rate", band.getRate());
-        Number id = insertBand.executeAndReturnKey(parameters);
-        band.setId(id.longValue());
-        
-        createStylesBand(band.getId(), band.getStyles());
+        band.setId(DBUtilsBand.getNextId(collection));
+        try {
+            String xQuery = "let $doc := doc($document)" +
+                    "return update insert element band{ " +
+                    "attribute id {$id}, " +
+                    "element name {$name}, " +
+
+                    "element styles{$styles}, " +
+
+                    "element region {$region}, " +
+                    "element pricePerHour {$pricePerHour}, " +
+                    "element rate {$rate} " +
+                    "} into $doc/bands";
+            XQueryService service = (XQueryService) collection.getService("XQueryService", "1.0");
+
+            service.declareVariable("document", "/db/bands/bands.xml");
+            DBUtilsBand.bindBandToXQuery(band, service);
+
+            service.setProperty("indent", "yes");
+            CompiledExpression compiled = service.compile(xQuery);
+
+            service.execute(compiled);
+            log.log(Level.INFO, "Create band in band manager "+ band + " is ok.");
+        }catch(XMLDBException ex){
+            log.log(Level.SEVERE, "DB exception: " + ex);
+            throw new DBException("Error while creating new band", ex);
+        }
+
+        DBUtilsBand.incrementId(collection, band.getId());
     }
     
     @Override
     public void updateBand(Band band) throws ServiceFailureException {
+        log.log(Level.INFO, "Update band "+band+" in band manager");
         validate(band);
-        if(band.getId() == null) {
-            throw new IllegalArgumentException("band id is null");
+        if(band.getId() == null){
+            log.log(Level.SEVERE, "BandException : Band id is null");
+            throw new BandException("Band id is null");
         }
-        String SQL = "UPDATE band SET name = ?,region = ?,pricePerHour = ?,rate = ? WHERE id = ?";
-        jdbcTemplateObject.update(SQL,band.getName(),band.getRegion().ordinal(),band.getPricePerHour(),band.getRate(),band.getId());
-        updateStylesBand(band.getId(), band.getStyles());
+
+        if(band.getId() < 0){
+            log.log(Level.SEVERE, "BandException : Band id is negative");
+            throw new BandException("Band id is negative");
+        }
+
+        if(findBandById(band.getId()) == null){
+            log.log(Level.SEVERE, "BandException : There is no band with id: " + band.getId() + " in DB");
+            throw new BandException("There is no band with id: " + band.getId() + " in DB");
+        }
+
+        try {
+            String xQuery = "let $doc := doc($document)" +
+                    "return update replace $doc/bands/band[@id=$id] with " +
+                    "element band{ " +
+                    "attribute id {$id}, " +
+                    "element name {$bandName}, " +
+
+                    "element styles {$styles}, " +          //!
+
+                    "element region {$region}, " +
+                    "element pricePerHours {$pricePerHours} " +
+                    "element rate {$rate}}";
+
+            XQueryService service = (XQueryService) collection.getService("XQueryService", "1.0");
+
+            service.declareVariable("document", "/db/bands/bands.xml");
+            DBUtilsBand.bindBandToXQuery(band, service);
+
+            service.setProperty("indent", "yes");
+            CompiledExpression compiled = service.compile(xQuery);
+
+            service.execute(compiled);
+            log.log(Level.INFO, "Update band is ok");
+
+        } catch (XMLDBException ex){
+            log.log(Level.SEVERE, "XMLDBException:"+ex);
+            throw new DBException("Error while updating band", ex);
+        }
     }
 
     @Override
     public void deleteBand(Band band) throws ServiceFailureException {
-        if (band == null) {
-            throw new IllegalArgumentException("band is null");
+        log.log(Level.INFO, "Delete band "+band+" in band manager");
+
+        if(band == null){
+            log.log(Level.SEVERE, "BandException : Band is null");
+            throw new BandException("Band is null");
         }
-        if (band.getId() == null) {
-            throw new IllegalArgumentException("band id is null");
+        if(band.getId() == null){
+            log.log(Level.SEVERE, "BandException : Band id is null");
+            throw new BandException("Band id is null");
         }
-        deleteStylesBand(band.getId());
-        jdbcTemplateObject.update("DELETE FROM band WHERE id = ?", band.getId());
+
+        if(band.getId() < 0){
+            log.log(Level.SEVERE, "BandException : Band id is negative");
+            throw new BandException("Band id is negative");
+        }
+
+        if(findBandById(band.getId()) == null){
+            log.log(Level.SEVERE, "BandException : There is no band with id: " + band.getId() + " in DB");
+            throw new BandException("There is no band with id: " + band.getId() + " in DB");
+        }
+
+        try {
+            String xQuery = "let $doc := doc($document)" +
+                    "return update delete $doc/bands/band[@id=$id]";
+
+            XQueryService service = (XQueryService) collection.getService("XQueryService", "1.0");
+
+            service.declareVariable("document", "/db/bands/bands.xml");
+            DBUtilsBand.bindBandToXQuery(band, service);
+
+            service.setProperty("indent", "yes");
+            CompiledExpression compiled = service.compile(xQuery);
+
+            service.execute(compiled);
+            log.log(Level.INFO, "Delete band is ok");
+        } catch (XMLDBException ex){
+            log.log(Level.SEVERE, "XMLDBException:"+ex);
+            throw new DBException("Error while deleting band", ex);
+        }
     }
     
     @Override
     public void createStylesBand(Long id, List<Style> styles) throws ServiceFailureException {
-        for(Style style : styles){
+        /*for(Style style : styles){
             SimpleJdbcInsert insertStyles = new SimpleJdbcInsert(jdbcTemplateObject).withTableName("band_styles").usingGeneratedKeyColumns("id");
             Map<String, Object> parameters = new HashMap<>(2);
             parameters.put("idBand", id);
             parameters.put("style", style.ordinal());
             insertStyles.executeAndReturnKey(parameters);
-        }
+        }*/
     }
     
     @Override
     public void updateStylesBand(Long id, List<Style> styles) throws ServiceFailureException {
-        deleteStylesBand(id);
+        /*deleteStylesBand(id);
         for(Style style : styles){
             SimpleJdbcInsert insertStyles = new SimpleJdbcInsert(jdbcTemplateObject).withTableName("band_styles").usingGeneratedKeyColumns("id");
             Map<String, Object> parameters = new HashMap<>(2);
             parameters.put("idBand", id);
             parameters.put("style", style.ordinal());
             insertStyles.executeAndReturnKey(parameters);
-        }
+        }*/
     }
     
     @Override
     public void deleteStylesBand(Long id) throws ServiceFailureException {
-        if (id == null) {
+        /*if (id == null) {
             throw new IllegalArgumentException("band is null");
         }
         
-        jdbcTemplateObject.update("DELETE FROM band_styles WHERE idBand = ?", id);
+        jdbcTemplateObject.update("DELETE FROM band_styles WHERE idBand = ?", id);*/
     }
     
     @Override
     public List<Style> getStylesBand(Long id) throws ServiceFailureException {
-        List<Style> styles = jdbcTemplateObject.query("SELECT style FROM band_styles WHERE idBand = ?", (ResultSet rs, int rowNum) -> Style.values()[rs.getInt("style")], id);
+       /* List<Style> styles = jdbcTemplateObject.query("SELECT style FROM band_styles WHERE idBand = ?", (ResultSet rs, int rowNum) -> Style.values()[rs.getInt("style")], id);
 
-        return styles;
+        return styles;*/
+        return null;
     }
 
     @Override
-    public List<Band> getAllBands() {
+    public Collection<Band> getAllBands() {
+        log.log(Level.INFO, "Get all bands in band manager");
+
+        Collection<Band> resultList;
         try {
-            List<Band> bands = jdbcTemplateObject.query("SELECT * FROM band", bandMapper);
-            for(Band b: bands) {
-                b.setStyles(getStylesBand(b.getId()));
-            }
-            return bands;
-        } catch (EmptyResultDataAccessException e) {
-            return null;
+            resultList = DBUtilsBand.selectBandsFromDBWhere(collection);
+        }catch(XMLDBException ex){
+            log.log(Level.SEVERE, "XMLDBException:"+ex);
+            throw new DBException("Error while getting all bands", ex);
         }
+        log.log(Level.INFO, "Get all bands is OK");
+        return resultList;
     }
     
     @Override
     public Band findBandById(Long id) throws ServiceFailureException {
-        try {
-            Band band = jdbcTemplateObject.queryForObject("SELECT * FROM band WHERE id = ?", bandMapper, id);
-            band.setStyles(getStylesBand(id));
-            return band;
-        } catch (EmptyResultDataAccessException e) {
-            return null;
+        log.log(Level.INFO, "Get band by ID "+id+" in band manager");
+        if(id == null){
+            log.log(Level.SEVERE, "Band exception : id is null");
+            throw new BandException("id is null");
         }
+        if(id < 0){
+            log.log(Level.SEVERE, "Band exception : id is negative");
+            throw new BandException("id is negative");
+        }
+        try {
+            String xQuery = "let $doc := doc($document) " +
+                    "return $doc/bands/band[@id=$id]";
+            XQueryService service = (XQueryService) collection.getService("XQueryService", "1.0");
+
+            service.declareVariable("document", "/db/bands/bands.xml");
+            service.declareVariable("id", id);
+
+            service.setProperty("indent", "yes");
+            CompiledExpression compiled = service.compile(xQuery);
+
+            ResourceSet res = service.execute(compiled);
+            ResourceIterator it = res.getIterator();
+            if(it.hasMoreResources()){
+                Resource resource = it.nextResource();
+                Band result = DBUtilsBand.parseBandFromXML(resource.getContent().toString());
+                if(it.hasMoreResources()){
+                    log.log(Level.SEVERE, "Band exception : More band with same id");
+                    throw new BandException("More band with same id");
+                }
+                log.log(Level.INFO, "Get band by ID is OK");
+                return result;
+            }
+        }catch(XMLDBException ex){
+            log.log(Level.SEVERE, "XMLDBException:"+ex);
+            throw new DBException("Error while creating new band",ex);
+        }
+        return null;
     }
 
     @Override
-    public List<Band> findBandByName(String name) throws ServiceFailureException {
-        try {
-            List<Band> bands = jdbcTemplateObject.query("SELECT * FROM band WHERE name= ?", bandMapper, name);
-            for(Band b: bands) {
-                b.setStyles(getStylesBand(b.getId()));
-            }
-            return bands;
-        } catch (EmptyResultDataAccessException e) {
-            return null;
+    public Collection<Band> findBandByName(String name) throws ServiceFailureException {
+        log.log(Level.INFO, "Get car by name " + name + " in band manager");
+        if(name == null){
+            log.log(Level.SEVERE, "IlegalArgumentException : name is null");
+            throw new IllegalArgumentException("name is null");
         }
+
+        if(name.isEmpty()){
+            log.log(Level.SEVERE, "IlegalArgumentException : is empty");
+            throw new IllegalArgumentException("name is empty");
+        }
+
+        Collection<Band> resultList;
+        try {
+            resultList = DBUtilsBand.selectBandsFromDBWhere(collection, "name=$argument0", new String[]{name});
+        }catch(XMLDBException ex){
+            log.log(Level.SEVERE, "XMLDBException:"+ex);
+            throw new DBException("Error while getting bands by name", ex);
+        }
+        log.log(Level.INFO, "Get band by name is OK");
+        return resultList;
     }
 
     @Override
     public List<Band> findBandByStyles(List<Style> styles) {
-        List<Band> bands = new ArrayList<>();
-        try {
-            for(Style s : styles) {
-                bands = jdbcTemplateObject.query("SELECT * FROM band LEFT JOIN band_styles " +
-                        "ON band.id = band_styles.idBand and band_styles.style = ?", bandMapper, s.ordinal());
-            }
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-        return bands;
+        return null;
     }
 
     @Override
-    public List<Band> findBandByRegion(List<Region> regions) {
-        List<Band> bands = new ArrayList<>();
+    public Collection<Band> findBandByRegion(List<Region> regions) {
+        log.log(Level.INFO, "Get band by region in band manager");
+
+        if(regions == null){
+            log.log(Level.SEVERE, "IlegalArgumentException : regions is null");
+            throw new IllegalArgumentException("regions is null");
+        }
+
+        Collection<Band> resultList;
         try {
-            String regionsString = "";
+            String regionsString = "";          //?
             for(Region r: regions) {
                 regionsString += r.ordinal()+",";
             }
-            bands = jdbcTemplateObject.query("SELECT * FROM BAND WHERE region IN("+regionsString.substring(0, regionsString.length()-1)+")", bandMapper);
-            for(Band b: bands) {
-                b.setStyles(getStylesBand(b.getId()));
-            }
-        } catch (EmptyResultDataAccessException e) {
-            return null;
+            resultList = DBUtilsBand.selectBandsFromDBWhere(collection,
+                    "region IN(\"+regionsString.substring(0, regionsString.length()-1)+\")", new String[]{regionsString});
+        }catch(XMLDBException ex){
+            log.log(Level.SEVERE, "XMLDBException:"+ex);
+            throw new DBException("Error while getting band by " + regions, ex);
         }
-        return bands;
+        log.log(Level.INFO, "Get band by regions is OK");
+        return resultList;
     }
 
     @Override
-    public List<Band> findBandByPriceRange(Double from, Double to) throws ServiceFailureException {
-        List<Band> bands = new ArrayList<>();
-        try {
-            bands = jdbcTemplateObject.query("SELECT * FROM band "
-                    + "WHERE pricePerHour >= ? AND pricePerHour <= ?", bandMapper, from, to);
-            for(Band b: bands) {
-                b.setStyles(getStylesBand(b.getId()));
-            }
-        } catch (EmptyResultDataAccessException e) {
-            return null;
+    public Collection<Band> findBandByPriceRange(Double from, Double to) throws ServiceFailureException {
+        log.log(Level.INFO, "Get band by price from " + from + " to " + to + " in band manager");
+
+        if(from < 0){
+            log.log(Level.SEVERE, "IlegalArgumentException : price from is negative");
+            throw new IllegalArgumentException("from is negative");
         }
-        return bands;
+        if(to < 0){
+            log.log(Level.SEVERE, "IlegalArgumentException : price to is negative");
+            throw new IllegalArgumentException("to is negative");
+        }
+        if(to < from){
+            log.log(Level.SEVERE, "IlegalArgumentException : to is less than from");
+            throw new IllegalArgumentException("to is less than from");
+        }
+
+        Collection<Band> resultList;
+        try {
+            resultList = DBUtilsBand.selectBandsFromDBWhere(collection,
+                    "pricePerHour>=number($argument0) and pricePerHour<=number($argument1)",
+                    new String[]{String.valueOf(from), String.valueOf(to)});
+        }catch(XMLDBException ex){
+            log.log(Level.SEVERE, "XMLDBException:"+ex);
+            throw new DBException("Error while getting bands less price", ex);
+        }
+        log.log(Level.INFO, "Get band by price is OK");
+        return resultList;
     }
 
     @Override
-    public List<Band> findBandByRate(Double from) throws ServiceFailureException {
-        List<Band> bands = new ArrayList<>();
-        try {
-            bands = jdbcTemplateObject.query("SELECT * FROM band " +
-                    "WHERE rate >= ?", bandMapper, from);
-            for(Band b: bands) {
-                b.setStyles(getStylesBand(b.getId()));
-            }
-        } catch (EmptyResultDataAccessException e) {
-            return null;
+    public Collection<Band> findBandByRate(Double from) throws ServiceFailureException {
+        log.log(Level.INFO, "Get band by rate from " + from + " in band manager");
+
+        if(from < 0){
+            log.log(Level.SEVERE, "IlegalArgumentException : price from is negative");
+            throw new IllegalArgumentException("from is negative");
         }
-        return bands;
+
+        Collection<Band> resultList;
+        try {
+            resultList = DBUtilsBand.selectBandsFromDBWhere(collection,
+                    "rate>=number($argument0)", new String[]{String.valueOf(from)});
+        }catch(XMLDBException ex){
+            log.log(Level.SEVERE, "XMLDBException:"+ex);
+            throw new DBException("Error while getting bands less rate", ex);
+        }
+        log.log(Level.INFO, "Get band by rate is OK");
+        return resultList;
     }
 
     /**
@@ -231,18 +378,5 @@ public class BandManagerImpl implements BandManager{
             throw new IllegalArgumentException("band rate is negative");
         }
     }
-
-    private RowMapper<Band> bandMapper = new RowMapper<Band>() {
-        @Override
-        public Band mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Band band = new Band();
-            band.setId(rs.getLong("id"));
-            band.setBandName(rs.getString("name"));
-            band.setRegion(Region.values()[rs.getInt("region")]);
-            band.setPricePerHour(rs.getDouble("pricePerHour"));
-            band.setRate(rs.getDouble("rate"));
-            return band;
-        }
-    };
 }
 

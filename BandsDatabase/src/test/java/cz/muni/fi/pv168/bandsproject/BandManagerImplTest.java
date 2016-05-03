@@ -1,7 +1,5 @@
 package cz.muni.fi.pv168.bandsproject;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,30 +12,32 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import javax.sql.DataSource;
-
 import static org.junit.Assert.*;
-import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
+import org.xmldb.api.base.Collection;
 
 /**
  *
  * @author Lenka Svetlovska
  */
-@RunWith(SpringJUnit4ClassRunner.class) //Spring se zúčastní unit testů
-@ContextConfiguration(classes = {MySpringTestConfig.class}) //konfigurace je ve třídě MySpringTestConfig
-@Transactional //každý test poběží ve vlastní transakci, která bude na konci rollbackována
 public class BandManagerImplTest {
-    @Autowired
-    private BandManager bandManager;
-
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    private BandManagerImpl bandManager;
+    private Collection collection;
+
+    @Before
+    public void setUp() throws Exception {
+        collection = DBUtilsBand.loadOrCreateBandCollection();
+        bandManager = new BandManagerImpl(collection);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        DBUtilsBand.dropBandDatabase();
+        collection.close();
+    }
 
     /**
      * Test of createBand method, of class BandManagerImpl.

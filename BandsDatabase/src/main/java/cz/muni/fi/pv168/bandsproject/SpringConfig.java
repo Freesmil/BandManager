@@ -53,7 +53,7 @@ public class SpringConfig {
 
     @Bean
     public BandManager bandManager() {
-        return new BandManagerImpl(new TransactionAwareDataSourceProxy(dataSource()));
+        return null; //new BandManagerImpl(new TransactionAwareDataSourceProxy(dataSource()));
     }
 
     @Bean

@@ -94,7 +94,7 @@ public class CustomerManagerImpl implements CustomerManager {
 
         } catch (XMLDBException ex){
             log.log(Level.SEVERE, "XMLDBException:"+ex);
-            throw new DBException("Error while updating car", ex);
+            throw new DBException("Error while updating customer", ex);
         }
     }
 

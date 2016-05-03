@@ -152,7 +152,7 @@ public class LeaseManagerImpl implements LeaseManager{
         public Lease mapRow(ResultSet rs, int rowNum) throws SQLException {
             Lease lease = new Lease();
             lease.setId(rs.getLong("id"));
-            lease.setBand(new BandManagerImpl(dataSource).findBandById(rs.getLong("idBand")));
+            //lease.setBand(new BandManagerImpl(dataSource).findBandById(rs.getLong("idBand")));
             //lease.setCustomer(new CustomerManagerImpl(dataSource).getCustomer(rs.getLong("idCustomer")));
             lease.setDate(rs.getTimestamp("date"));
             lease.setPlace(Region.values()[rs.getInt("region")]);

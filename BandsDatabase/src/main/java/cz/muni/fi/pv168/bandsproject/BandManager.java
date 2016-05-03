@@ -1,5 +1,6 @@
 package cz.muni.fi.pv168.bandsproject;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -22,17 +23,17 @@ public interface BandManager {
     
     public List<Style> getStylesBand(Long id);
     
-    public List<Band> getAllBands();
+    public Collection<Band> getAllBands();
     
     public Band findBandById(Long id);
     
-    public List<Band> findBandByName(String name);
+    public Collection<Band> findBandByName(String name);
     
-    public List<Band> findBandByStyles(List<Style> styles);
+    public Collection<Band> findBandByStyles(List<Style> styles);
     
-    public List<Band> findBandByRegion(List<Region> regions);
+    public Collection<Band> findBandByRegion(List<Region> regions);
     
-    public List<Band> findBandByPriceRange(Double from, Double to);
+    public Collection<Band> findBandByPriceRange(Double from, Double to);
     
-    public List<Band> findBandByRate(Double from);
+    public Collection<Band> findBandByRate(Double from);
 }
