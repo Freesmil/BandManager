@@ -63,7 +63,7 @@ public class CustomerManagerImplTest {
         try {
             customerManager.createCustomer(customer);
             fail("should refuse assigned id");
-        } catch (IllegalArgumentException ex) {
+        } catch (CustomerException ex) {
             //OK
         }
 
@@ -153,7 +153,7 @@ public class CustomerManagerImplTest {
             customer.setId(null);
             customerManager.updateCustomer(customer);
             fail();
-        } catch (IllegalArgumentException ex) {
+        } catch (CustomerException ex) {
             //OK
         }
 
@@ -201,6 +201,12 @@ public class CustomerManagerImplTest {
 
         assertNull(customerManager.getCustomer(customer.getId()));
         assertNotNull(customerManager.getCustomer(customer2.getId()));
+
+/*
+        assertNotNull(customerManager.getCustomer(1l));
+        customerManager.deleteCustomer(customerManager.getCustomer(1l));
+        assertNull(customerManager.getCustomer(1l));
+*/
     }
 
     @Test
@@ -210,7 +216,7 @@ public class CustomerManagerImplTest {
         customerManager.createCustomer(customer);
         
         //null id
-        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expect(CustomerException.class);
         customer.setId(null);
         customerManager.deleteCustomer(null);
 

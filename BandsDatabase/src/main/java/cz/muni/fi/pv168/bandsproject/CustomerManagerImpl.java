@@ -31,8 +31,9 @@ public class CustomerManagerImpl implements CustomerManager {
             String xQuery = "let $doc := doc($document)" +
                     "return update insert element customer{ " +
                     "attribute id {$id}, " +
+                    "element name {$name}, " +
                     "element phoneNumber {$phoneNumber}, " +
-                    "element address {$address}, " +
+                    "element address {$address} " +
                     "} into $doc/customers";
             XQueryService service = (XQueryService) collection.getService("XQueryService", "1.0");
 
@@ -73,12 +74,12 @@ public class CustomerManagerImpl implements CustomerManager {
 
         try {
             String xQuery = "let $doc := doc($document)" +
-                    "return update replace $doc/bands/customer[@id=$id] with " +
+                    "return update replace $doc/customers/customer[@id=$id] with " +
                     "element customer{ " +
                     "attribute id {$id}, " +
+                    "element name {$name}, " +
                     "element phoneNumber {$phoneNumber}, " +
-                    "element address {$address}, " +
-                    "element description {$description}}";
+                    "element address {$address}}";
 
             XQueryService service = (XQueryService) collection.getService("XQueryService", "1.0");
 
@@ -122,7 +123,7 @@ public class CustomerManagerImpl implements CustomerManager {
 
         try {
             String xQuery = "let $doc := doc($document)" +
-                    "return update delete $doc/bands/customer[@id=$id]";
+                    "return update delete $doc/customers/customer[@id=$id]";
 
             XQueryService service = (XQueryService) collection.getService("XQueryService", "1.0");
 
@@ -152,8 +153,8 @@ public class CustomerManagerImpl implements CustomerManager {
             throw new CustomerException("id is negative");
         }
         try {
-            String xQuery = "let $doc := doc($document)" +
-                    "return $doc/bands/customer[@id=$id]";
+            String xQuery = "let $doc := doc($document) " +
+                    "return $doc/customers/customer[@id=$id]";
             XQueryService service = (XQueryService) collection.getService("XQueryService", "1.0");
 
             service.declareVariable("document", "/db/bands/customers.xml");

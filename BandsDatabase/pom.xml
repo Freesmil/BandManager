@@ -26,16 +26,16 @@
 
     <!-- libraries, search for more at http://search.maven.org/ -->
     <dependencies>
-        <dependency>
-            <groupId>exist</groupId>
-            <artifactId>exist-xmldb</artifactId>
-            <version>0.9.2</version>
-        </dependency>
-        <dependency>
-            <groupId>xmldb</groupId>
-            <artifactId>xmldb-api</artifactId>
-            <version>20021118</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>exist</groupId>-->
+            <!--<artifactId>exist-xmldb</artifactId>-->
+            <!--<version>0.9.2</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>xmldb</groupId>-->
+            <!--<artifactId>xmldb-api</artifactId>-->
+            <!--<version>20021118</version>-->
+        <!--</dependency>-->
 
 
 

@@ -76,6 +76,7 @@ public class DBUtils {
             service.declareVariable("id", customer.getId());
             service.declareVariable("phoneNumber", customer.getPhoneNumber());
             service.declareVariable("address", customer.getAddress());
+            service.declareVariable("name", customer.getName());
         }catch(XMLDBException ex){
             log.log(Level.SEVERE, "XMLDBException in DBUtils:"+ex);
             throw new DBException("Error while binding customer.", ex);
@@ -150,12 +151,20 @@ public class DBUtils {
                 Element parent = (Element) a.item(0);
                 customer.setId(Long.parseLong(parent.getAttribute("id")));
 
+                a = parent.getElementsByTagName("name");
+                if(a.getLength() != 1){
+                    log.log(Level.SEVERE, "CustomerException in DBUtils: Error while parsing name");
+                    throw new CustomerException("Error while parsing name");
+                }
+                Element el = (Element) a.item(0);
+                customer.setName(el.getTextContent());
+
                 a = parent.getElementsByTagName("phoneNumber");
                 if(a.getLength() != 1){
                     log.log(Level.SEVERE, "CustomerException in DBUtils: Error while pustomersing phoneNumber");
                     throw new CustomerException("Error while pustomersing phoneNumber");
                 }
-                Element el = (Element) a.item(0);
+                el = (Element) a.item(0);
                 customer.setPhoneNumber(el.getTextContent());
 
                 a = parent.getElementsByTagName("address");
