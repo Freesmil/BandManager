@@ -9,8 +9,6 @@ Webový informačný systém pre kapely.
 
 ## Použité technológie
 
-* Relačná databáza - Derby
-  * Správa dát
 * Java
   * Riadiaca logika
 * XML
