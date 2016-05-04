@@ -76,7 +76,11 @@ public class DBUtilsBand {
         try {
             service.declareVariable("id", band.getId());
             service.declareVariable("name", band.getName());
-            service.declareVariable("styles", band.getStyles().toString());
+            int i = 0;
+            for (Style it : band.getStyles()) {
+                service.declareVariable("style" + i, it.toString());
+                i++;
+            }
             service.declareVariable("region", band.getRegion().toString());
             service.declareVariable("pricePerHour", band.getPricePerHour());
             service.declareVariable("rate", band.getRate());
@@ -168,8 +172,14 @@ public class DBUtilsBand {
                     throw new BandException("Error while parsing styles");
                 }
                 el = (Element) a.item(0);
-                //System.out.println("********* styles: " + el);    //dava null
-                //band.setStyles(el.getTextContent()); //je to string a potrebujem list!
+                NodeList b = el.getElementsByTagName("style");
+                List<Style> list = new ArrayList<>();
+                for (int i = 0; i < b.getLength(); i++) {
+                    Element elem = (Element) b.item(i);
+                    list.add(Style.valueOf(elem.getTextContent()));
+                }
+
+                band.setStyles(list);
 
                 a = parent.getElementsByTagName("region");
                 if(a.getLength() != 1){

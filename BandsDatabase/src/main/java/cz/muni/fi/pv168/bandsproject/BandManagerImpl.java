@@ -1,5 +1,6 @@
 package cz.muni.fi.pv168.bandsproject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import java.util.logging.Level;
@@ -31,14 +32,16 @@ public class BandManagerImpl implements BandManager{
         }
         band.setId(DBUtilsBand.getNextId(collection));
         try {
-            String xQuery = "let $doc := doc($document)" +
+            String xQuery = "let $doc := doc($document) " +
                     "return update insert element band{ " +
                     "attribute id {$id}, " +
                     "element name {$name}, " +
-
-                    "element styles{$styles}, " +
-
-                    "element region {$region}, " +
+                    "element styles{ ";
+            for (int i = 0; i < band.getStyles().size(); i++) {
+                xQuery += "element style{$style" + i + "}, ";
+            }
+            xQuery = xQuery.substring(0, xQuery.length() - 2);
+            xQuery += " }, element region {$region}, " +
                     "element pricePerHour {$pricePerHour}, " +
                     "element rate {$rate} " +
                     "} into $doc/bands";
@@ -80,18 +83,19 @@ public class BandManagerImpl implements BandManager{
         }
 
         try {
-            String xQuery = "let $doc := doc($document)" +
+            String xQuery = "let $doc := doc($document) " +
                     "return update replace $doc/bands/band[@id=$id] with " +
                     "element band{ " +
                     "attribute id {$id}, " +
-                    "element name {$bandName}, " +
-
-                    "element styles {$styles}, " +          //!
-
-                    "element region {$region}, " +
-                    "element pricePerHours {$pricePerHours} " +
+                    "element name {$name}, " +
+                    "element styles{ ";
+            for (int i = 0; i < band.getStyles().size(); i++) {
+                xQuery += "element style{$style" + i + "}, ";
+            }
+            xQuery = xQuery.substring(0, xQuery.length() - 2);
+            xQuery += " }, element region {$region}, " +
+                    "element pricePerHour {$pricePerHour}, " +
                     "element rate {$rate}}";
-
             XQueryService service = (XQueryService) collection.getService("XQueryService", "1.0");
 
             service.declareVariable("document", "/db/bands/bands.xml");
@@ -273,8 +277,29 @@ public class BandManagerImpl implements BandManager{
     }
 
     @Override
-    public List<Band> findBandByStyles(List<Style> styles) {
-        return null;
+    public Collection<Band> findBandByStyles(List<Style> styles) {
+        log.log(Level.INFO, "Get band by styles in band manager");
+
+        if(styles == null){
+            log.log(Level.SEVERE, "IlegalArgumentException : styles is null");
+            throw new IllegalArgumentException("styles is null");
+        }
+
+        Collection<Band> resultList = new ArrayList<>();
+        try {
+            String condition = "";
+            for (Style st : styles){
+                condition += "styles/style=\"" + st.toString() + "\" or ";
+            }
+            condition = condition.substring(0, condition.length() - 4);
+            resultList.addAll(DBUtilsBand.selectBandsFromDBWhere(collection, condition));
+        }catch(XMLDBException ex){
+            log.log(Level.SEVERE, "XMLDBException:"+ex);
+            throw new DBException("Error while getting band by " + styles, ex);
+        }
+        log.log(Level.INFO, "Get band by styles is OK");
+        return resultList;
+
     }
 
     @Override
@@ -286,14 +311,11 @@ public class BandManagerImpl implements BandManager{
             throw new IllegalArgumentException("regions is null");
         }
 
-        Collection<Band> resultList;
+        Collection<Band> resultList = new ArrayList<>();
         try {
-            String regionsString = "";          //?
-            for(Region r: regions) {
-                regionsString += r.ordinal()+",";
+            for (Region reg : regions){
+                resultList.addAll(DBUtilsBand.selectBandsFromDBWhere(collection, "region=$argument0", new String[]{String.valueOf(reg)}));
             }
-            resultList = DBUtilsBand.selectBandsFromDBWhere(collection,
-                    "region IN(\"+regionsString.substring(0, regionsString.length()-1)+\")", new String[]{regionsString});
         }catch(XMLDBException ex){
             log.log(Level.SEVERE, "XMLDBException:"+ex);
             throw new DBException("Error while getting band by " + regions, ex);

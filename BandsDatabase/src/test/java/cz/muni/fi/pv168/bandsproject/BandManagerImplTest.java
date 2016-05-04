@@ -93,7 +93,7 @@ public class BandManagerImplTest {
         Band band = newBand("Eufory", styles, Region.slovensko, 330.30, 6.5);
         band.setId(1L);
 
-        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expect(BandException.class);
         bandManager.createBand(band);
 
         //null band name
@@ -126,7 +126,7 @@ public class BandManagerImplTest {
     /**
      * Test of updateBand method, of class BandManagerImpl.
      */
-    @Test   //TODO
+    @Test
     public void testUpdateBand() {
         List<Style> styles = new ArrayList<>();
         styles.add(Style.rock);
@@ -213,7 +213,7 @@ public class BandManagerImplTest {
      * Test of deleteBand method with null, of class BandManagerImpl.
      * @throws java.lang.Exception
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = BandException.class)
     public void testDeleteBandWithNull() throws Exception {
         bandManager.deleteBand(null);
     }   
@@ -229,7 +229,7 @@ public class BandManagerImplTest {
         Band band = newBand("Eufory", styles, Region.slovensko, 330.30, 6.5);
 
         //null id
-        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expect(BandException.class);
         band.setId(null);
         bandManager.deleteBand(null);
 
@@ -299,13 +299,47 @@ public class BandManagerImplTest {
      */
     @Test   //TODO
     public void testFindBandByStyles() {
+        List<Style> styles = new ArrayList<>();
+        styles.add(Style.blues);
+        styles.add(Style.classical);
+        styles.add(Style.country);
+        assertTrue(bandManager.findBandByStyles(styles).isEmpty());
+
+        List<Style> st1 = new ArrayList<>();
+        st1.add(Style.blues);
+        st1.add(Style.classical);
+        st1.add(Style.dubstep);
+        Band b1 = newBand("Helenine oci", st1, Region.slovensko, 3512.23, 6.5);
+        List<Style> st2 = new ArrayList<>();
+        st2.add(Style.classical);
+        st2.add(Style.hipHop);
+        st2.add(Style.ska);
+        st2.add(Style.disco);
+        Band b2 = newBand("Slza", st2, Region.karlovarsky, 10.00, 0.1);
+        List<Style> st3 = new ArrayList<>();
+        st3.add(Style.ska);
+        st3.add(Style.rnb);
+        Band b3 = newBand("Bad Band", st3, Region.olomoucky, 12.99, 0.5);
+
+        bandManager.createBand(b1);
+        bandManager.createBand(b2);
+        bandManager.createBand(b3);
+
+        List<Band> expected = Arrays.asList(b1, b2);
+        List<Band> actual = new ArrayList<>(bandManager.findBandByStyles(styles));
+        assertEquals(2, actual.size());
+        assertDeepEquals(expected, actual);
+
+        List<Band> actual2 = new ArrayList<>(bandManager.findBandByStyles(Collections.singletonList(Style.funk)));
+        assertEquals(0, actual2.size());
+
 
     }
 
     /**
      * Test of findBandByRegion method, of class BandManagerImpl.
      */
-    @Test   //TODO
+    @Test
     public void testFindBandByRegion() {
         List<Region> regions = new ArrayList<>();
         regions.add(Region.plzensky);
@@ -328,7 +362,7 @@ public class BandManagerImplTest {
         regions = new ArrayList<>();
         regions.add(Region.slovensko);
         
-        List<Band> expected = Arrays.asList(band1);
+        List<Band> expected = Collections.singletonList(band1);
         List<Band> actual = new ArrayList<>(bandManager.findBandByRegion(regions));
         assertEquals(1, actual.size());
         assertDeepEquals(expected, actual);
