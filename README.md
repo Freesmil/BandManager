@@ -1,7 +1,7 @@
 # BandManager
 Webový informační systém pre kapely.
 
-## Tím
+## Tým
 * Tomáš Ševčovič
 * Lenka Svetlovská
 * Peter Sekan
