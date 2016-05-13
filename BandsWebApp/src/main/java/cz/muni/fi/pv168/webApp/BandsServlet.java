@@ -1,9 +1,6 @@
 package cz.muni.fi.pv168.webApp;
 
-import cz.muni.fi.pv168.bandsproject.Band;
-import cz.muni.fi.pv168.bandsproject.BandManager;
-import cz.muni.fi.pv168.bandsproject.Region;
-import cz.muni.fi.pv168.bandsproject.ServiceFailureException;
+import cz.muni.fi.pv168.bandsproject.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Lenka
@@ -39,16 +39,19 @@ public class BandsServlet extends HttpServlet {
             case "/add":
                 //na?ten� POST parametr? z formul�?e
                 String name = request.getParameter("name");
-                String styles = request.getParameter("styles"); //prerobit na list??
+                String[] stylesTexts = request.getParameterValues("styles");
                 Region region = Region.valueOf(request.getParameter("region"));
                 Double pricePerHour = Double.parseDouble(request.getParameter("pricePerHour"));
                 Double rate = Double.parseDouble(request.getParameter("rate"));
 
-                //kontrola vypln?n� hodnot
+                List<Style> styles = new ArrayList<>();
+                for (String style : stylesTexts) {
+                    styles.add(Style.valueOf(style));
+                }
+
                 if (name == null
                         || name.length() == 0
-                        || styles == null
-                        || styles.length() == 0
+                        || styles.size() == 0
                         || region == null
                         || pricePerHour < 0
                         || rate < 0) {
@@ -56,17 +59,18 @@ public class BandsServlet extends HttpServlet {
                     showBandsList(request, response);
                     return;
                 }
-                //zpracov�n� dat - vytvo?en� z�znamu v datab�zi
+
                 try {
+
                     Band band = new Band();
                     band.setBandName(name);
-                    band.setStyles(null); //styly musia byt v liste
+                    band.setStyles(styles);
                     band.setRegion(region);
                     band.setPricePerHour(pricePerHour);
                     band.setRate(rate);
                     getBandManager().createBand(band);
                     log.debug("created {}",band);
-                    //redirect-after-POST je ochrana p?ed v�cen�sobn�m odesl�n�m formul�?e
+
                     response.sendRedirect(request.getContextPath()+URL_MAPPING);
                     return;
                 } catch (ServiceFailureException e) {

@@ -1,26 +1,24 @@
 # BandManager
-Webový informačný systém pre kapely.
+Webový informační systém pre kapely.
 
-## Tím
+## Tým
 * Tomáš Ševčovič
 * Lenka Svetlovská
 * Peter Sekan
 * Martin Gazdag
 
-## Použité technológie
+## Použité technologie
 
-* Relačná databáza - Derby
-  * Správa dát
 * Java
-  * Riadiaca logika
+  * Řídící logika
 * XML
-  * Import a export dát
+  * Import a export dat
 * XML Schema
-  * Validácia importovaných dát
+  * Validace importovaných dat
 * XSLT
-  * Transformovanie XML dát na HTML pre zobrazenie vo webových prehliadačoch
+  * Transformování XML dat na HTML pro zobrazení ve webových prohlížečích
 
 ## Zadání
   Cílem projektu je implementovat webový informační systém pro katalog kapel.
   
-  V katalogu bude možné vyhledávat kapely pomocí několika kritérií: jméno, cena, působiště (kraj), stylů (které hrají) a hodnocení. V rámci systému bude možné uzavřít kontrakt mezi zákazníkem a kapelou. Zákazník si zde může vytvořit účet, následně se přihlásit a vybrat dané kapely. Kapely, které mají zájem následně informují zákazníka a vytvoří objednávku.
+ V katalogu bude možné vyhledávat kapely pomocí několika kritérií: jméno, cena, působiště (kraj), stylů (které hrají) a hodnocení. V rámci systému bude možné uzavřít kontrakt mezi kapelou a zákazníkem. Všechny operace řídí administrátor, který má vše na starosti. Systém slouží pouze pro přehled daných zakázek. 
