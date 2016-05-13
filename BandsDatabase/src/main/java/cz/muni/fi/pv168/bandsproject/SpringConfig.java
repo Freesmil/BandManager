@@ -35,8 +35,8 @@ public class SpringConfig {
         return new EmbeddedDatabaseBuilder()
                 .setType(DERBY)
                 .setName("bandDB")
-                .addScript("classpath:band-schema.sql")
-                .addScript("classpath:fill-table.sql")
+//                .addScript("classpath:band-schema.sql")
+//                .addScript("classpath:fill-table.sql")
                 .build();
 
     }
@@ -47,13 +47,27 @@ public class SpringConfig {
     }
 
     @Bean //n� manager, bude obalen ?�zen�m transakc�
-    public CustomerManager customerManager() {
-        return null; //new CustomerManagerImpl(dataSource());
+    public CustomerManager customerManager() throws Exception {
+        try {
+            DBUtils.dropCustomerDatabase();
+        }
+        catch (Exception ex) {
+            //ok
+        }
+        return new CustomerManagerImpl(DBUtils.loadOrCreateCustomerCollection());
+//        return null; //new CustomerManagerImpl(dataSource());
     }
 
     @Bean
-    public BandManager bandManager() {
-        return null; //new BandManagerImpl(new TransactionAwareDataSourceProxy(dataSource()));
+    public BandManager bandManager() throws Exception {
+        try {
+            DBUtilsBand.dropBandDatabase();
+        }
+        catch (Exception ex) {
+            //ok
+        }
+        return new BandManagerImpl(DBUtilsBand.loadOrCreateBandCollection());
+//        return null; //new BandManagerImpl(new TransactionAwareDataSourceProxy(dataSource()));
     }
 
     @Bean

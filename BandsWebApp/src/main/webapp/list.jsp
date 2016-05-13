@@ -4,77 +4,146 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html>
-<body>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bands project</title>
 
-<table border="1" cellpadding="5">
-    <thead>
-    <tr>
-        <th>Nazev kapely</th>
-        <th>Styly</th>
-        <th>Region</th>
-        <th>Cena za hodinu</th>
-        <th>Hodnoceni</th>
-    </tr>
-    </thead>
-    <c:forEach items="${bands}" var="band">
-        <tr>
-            <%--<form method="post" action="${pageContext.request.contextPath}/bands/update">--%>
-                <%--<td><input name="name" type="text" value="${band.name}" /></td>--%>
-                <%--<td><input name="style" type="text" value="${band.style}"/></td>--%>
-                <%--<td><input name="region" type="text" value="${band.region}"/></td>--%>
-                <%--<td><input name="pricePerHour" type="text" value="${band.pricePerHour}"/></td>--%>
-                <%--<td><input name="rate" type="text" value="${band.rate}"/></td>--%>
-                <%--<input type="hidden" name="id" value="${band.id}"/>--%>
-                <%--<td><input type="submit" value="Update"/></td>--%>
-            <%--</form>--%>
-            <%--<td><form method="post" action="${pageContext.request.contextPath}/bands/delete?id=${band.id}"--%>
-                      <%--style="margin-bottom: 0;"><input type="submit" value="Smazat"></form></td>--%>
-            <td align="center"><c:out value="${band.name}"/></td>
-            <td align="center"><c:out value="${band.styles.toString()}"/></td>
-            <td align="center"><c:out value="${band.region}"/></td>
-            <td align="center"><c:out value="${band.pricePerHour}"/></td>
-            <td align="center"><c:out value="${band.rate}"/></td>
+    <link href="${pageContext.request.contextPath}/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+</head>
+<body style="padding-top: 70px; padding-bottom: 30px;">
 
-            <td align="left" width="5%"><form method="post" action="${pageContext.request.contextPath}/bands/update?id=${band.id}"
-                                              style="margin-bottom: 0;"><input type="submit" value="Upravit"></form></td>
-
-            <td align="left" width="5%"><form method="post" action="${pageContext.request.contextPath}/bands/delete?id=${band.id}"
-                                              style="margin-bottom: 0;"><input type="submit" value="Smazat"></form></td>
-        </tr>
-    </c:forEach>
-</table>
-
-<h2>Zadejte kapelu</h2>
-<c:if test="${not empty chyba}">
-    <div style="border: solid 1px red; background-color: yellow; padding: 10px">
-        <c:out value="${chyba}"/>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Bands project</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="${pageContext.request.contextPath}/">Home</a></li>
+                <li class="active"><a href="${pageContext.request.contextPath}/bands/">Bands</a></li>
+                <li><a href="${pageContext.request.contextPath}/customers/">Customers</a></li>
+            </ul>
+        </div>
     </div>
-</c:if>
-<form action="${pageContext.request.contextPath}/bands/add" method="post">
-    <table>
+</nav>
+
+<div class="container theme-showcase" role="main">
+    <table class="table">
+        <thead>
         <tr>
-            <th>Nazev kapely:</th>
-            <td><input type="text" name="name" value="<c:out value='${param.name}'/>"/></td>
+            <th>Nazev kapely</th>
+            <th>Styly</th>
+            <th>Region</th>
+            <th>Cena za hodinu</th>
+            <th>Hodnoceni</th>
         </tr>
-        <tr>
-            <th>Styly:</th>
-            <td><input type="text" name="style" value="<c:out value='${param.style}'/>"/></td>
-        </tr>
-        <tr>
-            <th>Region:</th>
-            <td><input type="text" name="region" value="<c:out value='${param.region}'/>"/></td>
-        </tr>
-        <tr>
-            <th>Cena za hodinu:</th>
-            <td><input type="text" name="pricePerHour" value="<c:out value='${param.pricePerHour}'/>"/></td>
-        </tr>
-        <tr>
-            <th>Rate:</th>
-            <td><input type="text" name="rate" value="<c:out value='${param.rate}'/>"/></td>
-        </tr>
+        </thead>
+        <c:forEach items="${bands}" var="band">
+            <tr>
+                <%--<form method="post" action="${pageContext.request.contextPath}/bands/update">--%>
+                    <%--<td><input name="name" type="text" value="${band.name}" /></td>--%>
+                    <%--<td><input name="style" type="text" value="${band.style}"/></td>--%>
+                    <%--<td><input name="region" type="text" value="${band.region}"/></td>--%>
+                    <%--<td><input name="pricePerHour" type="text" value="${band.pricePerHour}"/></td>--%>
+                    <%--<td><input name="rate" type="text" value="${band.rate}"/></td>--%>
+                    <%--<input type="hidden" name="id" value="${band.id}"/>--%>
+                    <%--<td><input type="submit" value="Update"/></td>--%>
+                <%--</form>--%>
+                <%--<td><form method="post" action="${pageContext.request.contextPath}/bands/delete?id=${band.id}"--%>
+                          <%--style="margin-bottom: 0;"><input type="submit" value="Smazat"></form></td>--%>
+                <td align="center"><c:out value="${band.name}"/></td>
+                <td align="center"><c:out value="${band.styles.toString()}"/></td>
+                <td align="center"><c:out value="${band.region}"/></td>
+                <td align="center"><c:out value="${band.pricePerHour}"/></td>
+                <td align="center"><c:out value="${band.rate}"/></td>
+                <td align="left"><form method="post" action="${pageContext.request.contextPath}/bands/update?id=${band.id}"><input type="submit" value="Upravit"></form></td>
+                <td align="left"><form method="post" action="${pageContext.request.contextPath}/bands/delete?id=${band.id}"><input type="submit" value="Smazat"></form></td>
+            </tr>
+        </c:forEach>
     </table>
-    <input type="Submit" value="Zadat" />
-</form>
+
+    <h2>Zadejte kapelu</h2>
+    <c:if test="${not empty chyba}">
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Chyba:</span>
+            <c:out value="${chyba}"/>
+        </div>
+    </c:if>
+    <form action="${pageContext.request.contextPath}/bands/add" method="post">
+        <div class="form-group">
+            <label for="inputName">Nazev kapely:</label>
+            <input type="text" name="name" id="inputName" value="<c:out value="${param.name}"/>" class="form-control" placeholder="Meno">
+        </div>
+        <div class="form-group">
+            <label for="inputStyles">Styly:</label>
+            <select id="inputStyles" multiple class="form-control" name="styles">
+                <option>blues</option>
+                <option>classical</option>
+                <option>country</option>
+                <option>disco</option>
+                <option>dnb</option>
+                <option>dubstep</option>
+                <option>electronic</option>
+                <option>folk</option>
+                <option>funk</option>
+                <option>hipHop</option>
+                <option>house</option>
+                <option>jazz</option>
+                <option>metal</option>
+                <option>pop</option>
+                <option>punk</option>
+                <option>reggae</option>
+                <option>rock</option>
+                <option>rnb</option>
+                <option>ska</option>
+                <option>techno</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="inputRegion">Region:</label>
+            <select id="inputRegion" class="form-control" name="region">
+                <option>jihocesky</option>
+                <option>jihomoravsky</option>
+                <option>karlovarsky</option>
+                <option>kralovohradecky</option>
+                <option>liberecky</option>
+                <option>moravskosliezsky</option>
+                <option>olomoucky</option>
+                <option>pardubicky</option>
+                <option>plzensky</option>
+                <option>praha</option>
+                <option>stredocesky</option>
+                <option>ustecky</option>
+                <option>vysocina</option>
+                <option>zlinsky</option>
+                <option>slovensko</option>
+                <option>zahranici</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="inputPricePerHour">Cena za hodinu:</label>
+            <input type="text" name="pricePerHour" id="inputPricePerHour" value="<c:out value="${param.pricePerHour}"/>" class="form-control" placeholder="Cena za hodinu">
+        </div>
+        <div class="form-group">
+            <label for="inputRate">Rate:</label>
+            <input type="text" name="rate" id="inputRate" value="<c:out value="${param.rate}"/>" class="form-control" placeholder="Rate">
+        </div>
+        <input type="Submit" class="btn btn-default" value="Zadat" />
+    </form>
+</div>
 
 </body>
 </html>

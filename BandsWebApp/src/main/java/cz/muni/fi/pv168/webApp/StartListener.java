@@ -1,9 +1,6 @@
 package cz.muni.fi.pv168.webApp;
 
-import cz.muni.fi.pv168.bandsproject.BandManager;
-import cz.muni.fi.pv168.bandsproject.CustomerManager;
-import cz.muni.fi.pv168.bandsproject.LeaseManager;
-import cz.muni.fi.pv168.bandsproject.SpringConfig;
+import cz.muni.fi.pv168.bandsproject.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

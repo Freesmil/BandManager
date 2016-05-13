@@ -1,9 +1,6 @@
 package cz.muni.fi.pv168.webApp;
 
-import cz.muni.fi.pv168.bandsproject.Band;
-import cz.muni.fi.pv168.bandsproject.BandManager;
-import cz.muni.fi.pv168.bandsproject.Region;
-import cz.muni.fi.pv168.bandsproject.ServiceFailureException;
+import cz.muni.fi.pv168.bandsproject.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Lenka
@@ -39,7 +39,7 @@ public class BandsServlet extends HttpServlet {
             case "/add":
                 //na?ten� POST parametr? z formul�?e
                 String name = request.getParameter("name");
-                String styles = request.getParameter("styles"); //prerobit na list??
+                String stylesText = request.getParameter("styles"); //prerobit na list??
                 Region region = Region.valueOf(request.getParameter("region"));
                 Double pricePerHour = Double.parseDouble(request.getParameter("pricePerHour"));
                 Double rate = Double.parseDouble(request.getParameter("rate"));
@@ -47,8 +47,8 @@ public class BandsServlet extends HttpServlet {
                 //kontrola vypln?n� hodnot
                 if (name == null
                         || name.length() == 0
-                        || styles == null
-                        || styles.length() == 0
+                        || stylesText == null
+                        || stylesText.length() == 0
                         || region == null
                         || pricePerHour < 0
                         || rate < 0) {
@@ -58,9 +58,14 @@ public class BandsServlet extends HttpServlet {
                 }
                 //zpracov�n� dat - vytvo?en� z�znamu v datab�zi
                 try {
+                    List<Style> styles = new ArrayList<>();
+                    for (String style : stylesText.split(" ")) {
+                        styles.add(Style.valueOf(style));
+                    }
+
                     Band band = new Band();
                     band.setBandName(name);
-                    band.setStyles(null); //styly musia byt v liste
+                    band.setStyles(styles); //styly musia byt v liste
                     band.setRegion(region);
                     band.setPricePerHour(pricePerHour);
                     band.setRate(rate);
