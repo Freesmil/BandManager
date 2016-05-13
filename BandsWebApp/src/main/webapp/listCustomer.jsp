@@ -31,87 +31,93 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="${pageContext.request.contextPath}/">Home</a></li>
+                <li><a href="${pageContext.request.contextPath}/">Home</a></li>
                 <li><a href="${pageContext.request.contextPath}/bands/">Bands</a></li>
-                <li><a href="${pageContext.request.contextPath}/customers/">Customers</a></li>
+                <li class="active"><a href="${pageContext.request.contextPath}/customers/">Customers</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
 <div class="container theme-showcase" role="main">
+    <div class="row">
+        <div class="col-md-8">
 
-    <table class="table">
-        <thead>
-        <tr>
-            <th align="center">Meno</th>
-            <th align="center">Telefon</th>
-            <th align="center">Adresa</th>
-        </tr>
-        </thead>
-        <c:forEach items="${customers}" var="customer">
-            <tr>
-                <td align="center"><c:out value="${customer.name}"/></td>
-                <td align="center"><c:out value="${customer.phoneNumber}"/></td>
-                <td align="center"><c:out value="${customer.address}"/></td>
-                <td><form method="post" action="${pageContext.request.contextPath}/customers/showUpdate?id=${customer.id}"><input type="submit" value="Upravit"></form></td>
-                <td><form method="post" action="${pageContext.request.contextPath}/customers/delete?id=${customer.id}"><input type="submit" value="Smazat"></form></td>
-            </tr>
-        </c:forEach>
-    </table>
-
-    <c:if test="${not empty chyba}">
-        <div class="alert alert-danger" role="alert">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            <span class="sr-only">Chyba:</span>
-            <c:out value="${chyba}"/>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th align="center">Meno</th>
+                    <th align="center">Telefon</th>
+                    <th align="center">Adresa</th>
+                </tr>
+                </thead>
+                <c:forEach items="${customers}" var="customer">
+                    <tr>
+                        <td align="center"><c:out value="${customer.name}"/></td>
+                        <td align="center"><c:out value="${customer.phoneNumber}"/></td>
+                        <td align="center"><c:out value="${customer.address}"/></td>
+                        <td><form method="post" action="${pageContext.request.contextPath}/customers/showUpdate?id=${customer.id}"><input type="submit" value="Upravit"></form></td>
+                        <td><form method="post" action="${pageContext.request.contextPath}/customers/delete?id=${customer.id}"><input type="submit" value="Smazat"></form></td>
+                    </tr>
+                </c:forEach>
+            </table>
         </div>
-    </c:if>
 
-    <c:choose>
-        <c:when test="${not empty param.id}">
-            <h2>Upravit</h2>
-            <form action="${pageContext.request.contextPath}/customers/update" method="post">
-                <div class="form-group">
-                    <label for="inputEditName">Meno:</label>
-                    <input type="text" name="name" id="inputEditName" value="<c:out value="${name}"/>" class="form-control" placeholder="Meno">
+        <div class="col-md-4">
+            <c:if test="${not empty chyba}">
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Chyba:</span>
+                    <c:out value="${chyba}"/>
                 </div>
-                <div class="form-group">
-                    <label for="inputEditPhoneNumber">Telefon:</label>
-                    <input type="text" name="phoneNumber" id="inputEditPhoneNumber" value="<c:out value="${phoneNumber}"/>" class="form-control" placeholder="Telefon">
-                </div>
-                <div class="form-group">
-                    <label for="inputEditAddress">Adresa:</label>
-                    <input type="text" name="address" id="inputEditAddress" value="<c:out value="${address}"/>" class="form-control" placeholder="Adresa">
-                </div>
-                <input type="hidden" name="id" value="${param.id}"/>
+            </c:if>
 
-                <input type="Submit" class="btn btn-default" value="Odoslat" />
-            </form>
-            <a href="${pageContext.request.contextPath}/customers/"><button>Zrusit</button></a>
-        </c:when>
+            <c:choose>
+                <c:when test="${not empty param.id}">
+                    <h2>Upravit</h2>
+                    <form action="${pageContext.request.contextPath}/customers/update" method="post">
+                        <div class="form-group">
+                            <label for="inputEditName">Meno:</label>
+                            <input type="text" name="name" id="inputEditName" value="<c:out value="${name}"/>" class="form-control" placeholder="Meno">
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEditPhoneNumber">Telefon:</label>
+                            <input type="text" name="phoneNumber" id="inputEditPhoneNumber" value="<c:out value="${phoneNumber}"/>" class="form-control" placeholder="Telefon">
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEditAddress">Adresa:</label>
+                            <input type="text" name="address" id="inputEditAddress" value="<c:out value="${address}"/>" class="form-control" placeholder="Adresa">
+                        </div>
+                        <input type="hidden" name="id" value="${param.id}"/>
+
+                        <input type="Submit" class="btn btn-default" value="Odoslat" />
+                    </form>
+                    <a href="${pageContext.request.contextPath}/customers/"><button>Zrusit</button></a>
+                </c:when>
 
 
-        <c:otherwise>
-            <h2>Novy zakaznik</h2>
-            <form action="${pageContext.request.contextPath}/customers/add" method="post">
-                <div class="form-group">
-                    <label for="inputName">Meno:</label>
-                    <input type="text" name="name" id="inputName" value="<c:out value="${param.name}"/>" class="form-control" placeholder="Meno">
-                </div>
-                <div class="form-group">
-                    <label for="inputPhoneNumber">Telefon:</label>
-                    <input type="text" name="phoneNumber" id="inputPhoneNumber" value="<c:out value="${param.phoneNumber}"/>" class="form-control" placeholder="Telefon">
-                </div>
-                <div class="form-group">
-                    <label for="inputAddress">Adresa:</label>
-                    <input type="text" name="address" id="inputAddress" value="<c:out value="${param.address}"/>" class="form-control" placeholder="Adresa">
-                </div>
-                <input type="Submit" class="btn btn-default" value="Zadat" />
-            </form>
-        </c:otherwise>
+                <c:otherwise>
+                    <h2>Novy zakaznik</h2>
+                    <form action="${pageContext.request.contextPath}/customers/add" method="post">
+                        <div class="form-group">
+                            <label for="inputName">Meno:</label>
+                            <input type="text" name="name" id="inputName" value="<c:out value="${param.name}"/>" class="form-control" placeholder="Meno">
+                        </div>
+                        <div class="form-group">
+                            <label for="inputPhoneNumber">Telefon:</label>
+                            <input type="text" name="phoneNumber" id="inputPhoneNumber" value="<c:out value="${param.phoneNumber}"/>" class="form-control" placeholder="Telefon">
+                        </div>
+                        <div class="form-group">
+                            <label for="inputAddress">Adresa:</label>
+                            <input type="text" name="address" id="inputAddress" value="<c:out value="${param.address}"/>" class="form-control" placeholder="Adresa">
+                        </div>
+                        <input type="Submit" class="btn btn-default" value="Zadat" />
+                    </form>
+                </c:otherwise>
 
-    </c:choose>
+            </c:choose>
+        </div>
+    </div>
 </div>
 </body>
 </html>

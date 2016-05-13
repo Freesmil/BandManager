@@ -39,16 +39,19 @@ public class BandsServlet extends HttpServlet {
             case "/add":
                 //na?ten� POST parametr? z formul�?e
                 String name = request.getParameter("name");
-                String stylesText = request.getParameter("styles"); //prerobit na list??
+                String[] stylesTexts = request.getParameterValues("styles");
                 Region region = Region.valueOf(request.getParameter("region"));
                 Double pricePerHour = Double.parseDouble(request.getParameter("pricePerHour"));
                 Double rate = Double.parseDouble(request.getParameter("rate"));
 
-                //kontrola vypln?n� hodnot
+                List<Style> styles = new ArrayList<>();
+                for (String style : stylesTexts) {
+                    styles.add(Style.valueOf(style));
+                }
+
                 if (name == null
                         || name.length() == 0
-                        || stylesText == null
-                        || stylesText.length() == 0
+                        || styles.size() == 0
                         || region == null
                         || pricePerHour < 0
                         || rate < 0) {
@@ -56,22 +59,18 @@ public class BandsServlet extends HttpServlet {
                     showBandsList(request, response);
                     return;
                 }
-                //zpracov�n� dat - vytvo?en� z�znamu v datab�zi
+
                 try {
-                    List<Style> styles = new ArrayList<>();
-                    for (String style : stylesText.split(" ")) {
-                        styles.add(Style.valueOf(style));
-                    }
 
                     Band band = new Band();
                     band.setBandName(name);
-                    band.setStyles(styles); //styly musia byt v liste
+                    band.setStyles(styles);
                     band.setRegion(region);
                     band.setPricePerHour(pricePerHour);
                     band.setRate(rate);
                     getBandManager().createBand(band);
                     log.debug("created {}",band);
-                    //redirect-after-POST je ochrana p?ed v�cen�sobn�m odesl�n�m formul�?e
+
                     response.sendRedirect(request.getContextPath()+URL_MAPPING);
                     return;
                 } catch (ServiceFailureException e) {

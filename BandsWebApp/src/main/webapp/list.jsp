@@ -40,109 +40,115 @@
 </nav>
 
 <div class="container theme-showcase" role="main">
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Nazev kapely</th>
-            <th>Styly</th>
-            <th>Region</th>
-            <th>Cena za hodinu</th>
-            <th>Hodnoceni</th>
-        </tr>
-        </thead>
-        <c:forEach items="${bands}" var="band">
-            <tr>
-                <%--<form method="post" action="${pageContext.request.contextPath}/bands/update">--%>
-                    <%--<td><input name="name" type="text" value="${band.name}" /></td>--%>
-                    <%--<td><input name="style" type="text" value="${band.style}"/></td>--%>
-                    <%--<td><input name="region" type="text" value="${band.region}"/></td>--%>
-                    <%--<td><input name="pricePerHour" type="text" value="${band.pricePerHour}"/></td>--%>
-                    <%--<td><input name="rate" type="text" value="${band.rate}"/></td>--%>
-                    <%--<input type="hidden" name="id" value="${band.id}"/>--%>
-                    <%--<td><input type="submit" value="Update"/></td>--%>
-                <%--</form>--%>
-                <%--<td><form method="post" action="${pageContext.request.contextPath}/bands/delete?id=${band.id}"--%>
-                          <%--style="margin-bottom: 0;"><input type="submit" value="Smazat"></form></td>--%>
-                <td align="center"><c:out value="${band.name}"/></td>
-                <td align="center"><c:out value="${band.styles.toString()}"/></td>
-                <td align="center"><c:out value="${band.region}"/></td>
-                <td align="center"><c:out value="${band.pricePerHour}"/></td>
-                <td align="center"><c:out value="${band.rate}"/></td>
-                <td align="left"><form method="post" action="${pageContext.request.contextPath}/bands/update?id=${band.id}"><input type="submit" value="Upravit"></form></td>
-                <td align="left"><form method="post" action="${pageContext.request.contextPath}/bands/delete?id=${band.id}"><input type="submit" value="Smazat"></form></td>
-            </tr>
-        </c:forEach>
-    </table>
+    <div class="row">
+        <div class="col-md-8">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Nazev kapely</th>
+                    <th>Styly</th>
+                    <th>Region</th>
+                    <th>Cena za hodinu</th>
+                    <th>Hodnoceni</th>
+                </tr>
+                </thead>
+                <c:forEach items="${bands}" var="band">
+                    <tr>
+                        <%--<form method="post" action="${pageContext.request.contextPath}/bands/update">--%>
+                            <%--<td><input name="name" type="text" value="${band.name}" /></td>--%>
+                            <%--<td><input name="style" type="text" value="${band.style}"/></td>--%>
+                            <%--<td><input name="region" type="text" value="${band.region}"/></td>--%>
+                            <%--<td><input name="pricePerHour" type="text" value="${band.pricePerHour}"/></td>--%>
+                            <%--<td><input name="rate" type="text" value="${band.rate}"/></td>--%>
+                            <%--<input type="hidden" name="id" value="${band.id}"/>--%>
+                            <%--<td><input type="submit" value="Update"/></td>--%>
+                        <%--</form>--%>
+                        <%--<td><form method="post" action="${pageContext.request.contextPath}/bands/delete?id=${band.id}"--%>
+                                  <%--style="margin-bottom: 0;"><input type="submit" value="Smazat"></form></td>--%>
+                        <td align="center"><c:out value="${band.name}"/></td>
+                        <td align="center"><c:out value="${band.styles.toString()}"/></td>
+                        <td align="center"><c:out value="${band.region}"/></td>
+                        <td align="center"><c:out value="${band.pricePerHour}"/></td>
+                        <td align="center"><c:out value="${band.rate}"/></td>
+                        <td align="left"><form method="post" action="${pageContext.request.contextPath}/bands/update?id=${band.id}"><input type="submit" value="Upravit"></form></td>
+                        <td align="left"><form method="post" action="${pageContext.request.contextPath}/bands/delete?id=${band.id}"><input type="submit" value="Smazat"></form></td>
+                    </tr>
+                </c:forEach>
+            </table>
+        </div>
 
-    <h2>Zadejte kapelu</h2>
-    <c:if test="${not empty chyba}">
-        <div class="alert alert-danger" role="alert">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            <span class="sr-only">Chyba:</span>
-            <c:out value="${chyba}"/>
+        <div class="col-md-4">
+            <h2>Zadejte kapelu</h2>
+            <c:if test="${not empty chyba}">
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Chyba:</span>
+                    <c:out value="${chyba}"/>
+                </div>
+            </c:if>
+            <form action="${pageContext.request.contextPath}/bands/add" method="post">
+                <div class="form-group">
+                    <label for="inputName">Nazev kapely:</label>
+                    <input type="text" name="name" id="inputName" value="<c:out value="${param.name}"/>" class="form-control" placeholder="Meno">
+                </div>
+                <div class="form-group">
+                    <label for="inputStyles">Styly:</label>
+                    <select id="inputStyles" multiple class="form-control" name="styles">
+                        <option>blues</option>
+                        <option>classical</option>
+                        <option>country</option>
+                        <option>disco</option>
+                        <option>dnb</option>
+                        <option>dubstep</option>
+                        <option>electronic</option>
+                        <option>folk</option>
+                        <option>funk</option>
+                        <option>hipHop</option>
+                        <option>house</option>
+                        <option>jazz</option>
+                        <option>metal</option>
+                        <option>pop</option>
+                        <option>punk</option>
+                        <option>reggae</option>
+                        <option>rock</option>
+                        <option>rnb</option>
+                        <option>ska</option>
+                        <option>techno</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="inputRegion">Region:</label>
+                    <select id="inputRegion" class="form-control" name="region">
+                        <option>jihocesky</option>
+                        <option>jihomoravsky</option>
+                        <option>karlovarsky</option>
+                        <option>kralovohradecky</option>
+                        <option>liberecky</option>
+                        <option>moravskosliezsky</option>
+                        <option>olomoucky</option>
+                        <option>pardubicky</option>
+                        <option>plzensky</option>
+                        <option>praha</option>
+                        <option>stredocesky</option>
+                        <option>ustecky</option>
+                        <option>vysocina</option>
+                        <option>zlinsky</option>
+                        <option>slovensko</option>
+                        <option>zahranici</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="inputPricePerHour">Cena za hodinu:</label>
+                    <input type="text" name="pricePerHour" id="inputPricePerHour" value="<c:out value="${param.pricePerHour}"/>" class="form-control" placeholder="Cena za hodinu">
+                </div>
+                <div class="form-group">
+                    <label for="inputRate">Rate:</label>
+                    <input type="text" name="rate" id="inputRate" value="<c:out value="${param.rate}"/>" class="form-control" placeholder="Rate">
+                </div>
+                <input type="Submit" class="btn btn-default" value="Zadat" />
+            </form>
         </div>
-    </c:if>
-    <form action="${pageContext.request.contextPath}/bands/add" method="post">
-        <div class="form-group">
-            <label for="inputName">Nazev kapely:</label>
-            <input type="text" name="name" id="inputName" value="<c:out value="${param.name}"/>" class="form-control" placeholder="Meno">
-        </div>
-        <div class="form-group">
-            <label for="inputStyles">Styly:</label>
-            <select id="inputStyles" multiple class="form-control" name="styles">
-                <option>blues</option>
-                <option>classical</option>
-                <option>country</option>
-                <option>disco</option>
-                <option>dnb</option>
-                <option>dubstep</option>
-                <option>electronic</option>
-                <option>folk</option>
-                <option>funk</option>
-                <option>hipHop</option>
-                <option>house</option>
-                <option>jazz</option>
-                <option>metal</option>
-                <option>pop</option>
-                <option>punk</option>
-                <option>reggae</option>
-                <option>rock</option>
-                <option>rnb</option>
-                <option>ska</option>
-                <option>techno</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="inputRegion">Region:</label>
-            <select id="inputRegion" class="form-control" name="region">
-                <option>jihocesky</option>
-                <option>jihomoravsky</option>
-                <option>karlovarsky</option>
-                <option>kralovohradecky</option>
-                <option>liberecky</option>
-                <option>moravskosliezsky</option>
-                <option>olomoucky</option>
-                <option>pardubicky</option>
-                <option>plzensky</option>
-                <option>praha</option>
-                <option>stredocesky</option>
-                <option>ustecky</option>
-                <option>vysocina</option>
-                <option>zlinsky</option>
-                <option>slovensko</option>
-                <option>zahranici</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="inputPricePerHour">Cena za hodinu:</label>
-            <input type="text" name="pricePerHour" id="inputPricePerHour" value="<c:out value="${param.pricePerHour}"/>" class="form-control" placeholder="Cena za hodinu">
-        </div>
-        <div class="form-group">
-            <label for="inputRate">Rate:</label>
-            <input type="text" name="rate" id="inputRate" value="<c:out value="${param.rate}"/>" class="form-control" placeholder="Rate">
-        </div>
-        <input type="Submit" class="btn btn-default" value="Zadat" />
-    </form>
+    </div>
 </div>
 
 </body>
