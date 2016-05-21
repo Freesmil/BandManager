@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,11 +35,74 @@ public class BandsServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        //aby fungovala ?estina z formul�?e
         request.setCharacterEncoding("utf-8");
-        //akce podle p?�pony v URL
+
         String action = request.getPathInfo();
         switch (action) {
+            case "/filter":
+                try {
+                    String name = request.getParameter("name");
+                    String[] stylesTexts = request.getParameterValues("styles");
+                    String region = request.getParameter("region");
+                    String pricePerHourFrom = request.getParameter("pricePerHourFrom");
+                    String pricePerHourTo = request.getParameter("pricePerHourTo");
+                    String rate = request.getParameter("rate");
+
+                    List<Style> styles = new ArrayList<>();
+                    if (stylesTexts != null) {
+                        for (String style : stylesTexts) {
+                            styles.add(Style.valueOf(style));
+                        }
+                    }
+
+                    Collection<Band> collection = null;
+                    if (name != null && name.length() > 0) {
+                        collection = getBandManager().findBandByName(name);
+                    }
+
+                    if (styles.size() != 0) {
+                        Collection<Band> filter = getBandManager().findBandByStyles(styles);
+                        if (collection == null) collection = filter;
+                        else {
+                            collection = intersection(collection, filter);
+                        }
+                    }
+
+                    if (region != null && !region.equals("-")) {
+                        List<Region> list = new ArrayList<>();
+                        list.add(Region.valueOf(region));
+                        Collection<Band> filter = getBandManager().findBandByRegion(list);
+                        if (collection == null) collection = filter;
+                        else {
+                            collection = intersection(collection, filter);
+                        }
+                    }
+
+                    if (pricePerHourFrom != null && pricePerHourFrom.length() > 0 && pricePerHourTo != null && pricePerHourTo.length() > 0) {
+                        Collection<Band> filter = getBandManager().findBandByPriceRange(Double.valueOf(pricePerHourFrom),Double.valueOf(pricePerHourTo));
+                        if (collection == null) collection = filter;
+                        else {
+                            collection = intersection(collection, filter);
+                        }
+                    }
+
+                    if (rate != null && rate.length() > 0) {
+                        Collection<Band> filter = getBandManager().findBandByRate(Double.valueOf(rate));
+                        if (collection == null) collection = filter;
+                        else {
+                            collection = intersection(collection, filter);
+                        }
+                    }
+
+                    request.setAttribute("bands", collection);
+                    request.setAttribute("styles", Style.values());
+                    request.setAttribute("regions", Region.values());
+                    request.getRequestDispatcher(LIST_JSP).forward(request, response);
+                } catch (Exception e) {
+                    log.error("Cannot filter bands", e);
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                }
+                return;
             case "/add":
                 try {
                     String name = request.getParameter("name");
@@ -179,6 +243,18 @@ public class BandsServlet extends HttpServlet {
             log.error("Cannot show bands", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    private Collection<Band> intersection(Collection<Band> list1, Collection<Band> list2) {
+        Collection<Band> list = new ArrayList<Band>();
+
+        for (Band t : list1) {
+            if(list2.contains(t)) {
+                list.add(t);
+            }
+        }
+
+        return list;
     }
 }
 

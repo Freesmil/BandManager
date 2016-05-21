@@ -43,6 +43,55 @@
 <div class="container theme-showcase" role="main">
     <div class="row">
         <div class="col-md-8">
+            <h2>Filtrovanie <a href="#filters" class="filtersButton"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></a></h2>
+            <div style="display: none" class="filterWindow">
+                <form action="${pageContext.request.contextPath}/bands/filter" method="post">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="filterName">Nazev kapely:</label>
+                                <input type="text" name="name" id="filterName" value="" class="form-control" placeholder="Meno">
+                            </div>
+                            <div class="form-group">
+                                <label for="filterStyles">Styly:</label>
+                                <select id="filterStyles" multiple class="form-control" name="styles">
+                                    <c:forEach items="${styles}" var="style">
+                                        <option>${style.name()}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="filterRegion">Region:</label>
+                                <select id="filterRegion" class="form-control" name="region">
+                                    <option>-</option>
+                                    <c:forEach items="${regions}" var="region">
+                                        <option>${region.name()}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="filterRate">Minimalny rate:</label>
+                                <input type="text" name="rate" id="filterRate" value="" class="form-control" placeholder="Minimalny rate">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="filterPricePerHourFrom">Cena za hodinu od:</label>
+                                <input type="text" name="pricePerHourFrom" id="filterPricePerHourFrom" value="" class="form-control" placeholder="Cena za hodinu od">
+                            </div>
+                            <div class="form-group">
+                                <label for="filterPricePerHourTo">Cena za hodinu do:</label>
+                                <input type="text" name="pricePerHourTo" id="filterPricePerHourTo" value="" class="form-control" placeholder="Cena za hodinu do">
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="Submit" class="btn btn-default" value="Filtrovat"/>
+                </form>
+            </div>
+            <h2>Zoznam kapiel</h2>
             <table class="table">
                 <thead>
                 <tr>
