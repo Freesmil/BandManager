@@ -1,5 +1,7 @@
 package cz.muni.fi.pv168.bandsproject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -7,6 +9,7 @@ import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.xmldb.api.base.Collection;
 
 import javax.sql.DataSource;
 
@@ -26,6 +29,21 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.
 @Configuration
 @EnableTransactionManagement
 public class MySpringTestConfig {
+    private final static Logger log = LoggerFactory.getLogger(MySpringTestConfig.class);
+
+    Collection collection = null;
+
+    public MySpringTestConfig() throws Exception {
+        try {
+            DBUtils.dropDatabaseCollection();
+            log.info("dropDatabaseCollection SUCCESS");
+        }
+        catch (Exception ex) {
+            log.info("dropDatabaseCollection FAIL");
+            throw ex;
+        }
+        collection = DBUtils.loadOrCreateDatabaseCollection();
+    }
 
     @Bean
     public DataSource dataSource() {
@@ -42,18 +60,19 @@ public class MySpringTestConfig {
     }
 
     @Bean
-    public CustomerManager customerManager() {
-        return null; //new CustomerManagerImpl(dataSource());
+    public CustomerManager customerManager() throws Exception {
+        DBUtils.createIfNotExistsCustomerResource();
+        return new CustomerManagerImpl(collection);
     }
 
     @Bean
-    public BandManager bandManager() {
-        // BandManagerImpl nepoužívá Spring JDBC, musíme mu vnutit spolupráci se Spring transakcemi !
-        return null; //new BandManagerImpl(new TransactionAwareDataSourceProxy(dataSource()));
+    public BandManager bandManager() throws Exception {
+        DBUtilsBand.createIfNotExistsBandResource();
+        return new BandManagerImpl(collection);
     }
 
     @Bean
-    public LeaseManager leaseManager() {
+    public LeaseManager leaseManager() throws Exception {
         LeaseManagerImpl leaseManager = new LeaseManagerImpl(dataSource());
         leaseManager.setBandManager(bandManager());
         leaseManager.setCustomerManager(customerManager());

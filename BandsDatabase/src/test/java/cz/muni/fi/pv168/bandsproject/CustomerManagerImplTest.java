@@ -5,6 +5,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmldb.api.base.Collection;
 
 import static org.hamcrest.core.Is.is;
@@ -24,15 +26,27 @@ public class CustomerManagerImplTest {
     private CustomerManagerImpl customerManager;
     private Collection collection;
 
+    private final static Logger log = LoggerFactory.getLogger(BandManagerImplTest.class);
+
     @Before
     public void setUp() throws Exception {
-        collection = DBUtils.loadOrCreateCustomerCollection();
+        try {
+            DBUtils.dropDatabaseCollection();
+            log.info("dropDatabaseCollection SUCCESS");
+        }
+        catch (Exception ex) {
+            log.info("dropDatabaseCollection FAIL");
+            throw ex;
+        }
+
+        collection = DBUtils.loadOrCreateDatabaseCollection();
+        DBUtils.createIfNotExistsCustomerResource();
         customerManager = new CustomerManagerImpl(collection);
     }
 
     @After
     public void tearDown() throws Exception {
-        DBUtils.dropCustomerDatabase();
+        DBUtils.dropDatabaseCollection();
         collection.close();
     }
 

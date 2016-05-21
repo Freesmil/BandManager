@@ -14,6 +14,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 import org.junit.rules.ExpectedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmldb.api.base.Collection;
 
 /**
@@ -27,15 +29,27 @@ public class BandManagerImplTest {
     private BandManagerImpl bandManager;
     private Collection collection;
 
+    private final static Logger log = LoggerFactory.getLogger(BandManagerImplTest.class);
+
     @Before
     public void setUp() throws Exception {
-        collection = DBUtilsBand.loadOrCreateBandCollection();
+        try {
+            DBUtils.dropDatabaseCollection();
+            log.info("dropDatabaseCollection SUCCESS");
+        }
+        catch (Exception ex) {
+            log.info("dropDatabaseCollection FAIL");
+            throw ex;
+        }
+
+        collection = DBUtils.loadOrCreateDatabaseCollection();
+        DBUtilsBand.createIfNotExistsBandResource();
         bandManager = new BandManagerImpl(collection);
     }
 
     @After
     public void tearDown() throws Exception {
-        DBUtilsBand.dropBandDatabase();
+        DBUtils.dropDatabaseCollection();
         collection.close();
     }
 

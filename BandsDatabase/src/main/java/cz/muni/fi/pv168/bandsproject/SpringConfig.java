@@ -1,12 +1,16 @@
 package cz.muni.fi.pv168.bandsproject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.xmldb.api.base.Collection;
+import org.xmldb.api.base.XMLDBException;
+
 import javax.sql.DataSource;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.DERBY;
 
@@ -21,53 +25,46 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.
 @Configuration  //je to konfigurace pro Spring
 @EnableTransactionManagement //bude ?�dit transakce u metod ozna?en�ch @Transactional
 public class SpringConfig {
+    private final static Logger log = LoggerFactory.getLogger(SpringConfig.class);
+
+    Collection collection = null;
+
+    public SpringConfig() throws Exception {
+        try {
+            DBUtils.dropDatabaseCollection();
+            log.info("dropDatabaseCollection SUCCESS");
+        }
+        catch (Exception ex) {
+            log.error("dropDatabaseCollection FAIL");
+            throw ex;
+        }
+        collection = DBUtils.loadOrCreateDatabaseCollection();
+    }
 
     @Bean
     public DataSource dataSource(){
-        /*//s�tov� datab�ze
-        BasicDataSource bds = new BasicDataSource();
-        bds.setDriverClassName("org.apache.derby.jdbc.ClientDriver");
-        bds.setUrl("jdbc:derby://localhost:1527/bandDB");
-        //bds.setUsername("admin");
-        //bds.setPassword("admin");
-        return bds;*/
-
         return new EmbeddedDatabaseBuilder()
                 .setType(DERBY)
                 .setName("bandDB")
-//                .addScript("classpath:band-schema.sql")
-//                .addScript("classpath:fill-table.sql")
                 .build();
 
     }
 
-    @Bean //pot?eba pro @EnableTransactionManagement
+    @Bean
     public PlatformTransactionManager transactionManager() {
         return new DataSourceTransactionManager(dataSource());
     }
 
-    @Bean //n� manager, bude obalen ?�zen�m transakc�
+    @Bean
     public CustomerManager customerManager() throws Exception {
-        try {
-            DBUtils.dropCustomerDatabase();
-        }
-        catch (Exception ex) {
-            //ok
-        }
-        return new CustomerManagerImpl(DBUtils.loadOrCreateCustomerCollection());
-//        return null; //new CustomerManagerImpl(dataSource());
+        DBUtils.createIfNotExistsCustomerResource();
+        return new CustomerManagerImpl(collection);
     }
 
     @Bean
     public BandManager bandManager() throws Exception {
-        try {
-            DBUtilsBand.dropBandDatabase();
-        }
-        catch (Exception ex) {
-            //ok
-        }
-        return new BandManagerImpl(DBUtilsBand.loadOrCreateBandCollection());
-//        return null; //new BandManagerImpl(new TransactionAwareDataSourceProxy(dataSource()));
+        DBUtilsBand.createIfNotExistsBandResource();
+        return new BandManagerImpl(collection);
     }
 
     @Bean

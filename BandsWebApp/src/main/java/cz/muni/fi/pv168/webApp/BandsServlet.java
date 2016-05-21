@@ -12,6 +12,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -37,46 +40,49 @@ public class BandsServlet extends HttpServlet {
         String action = request.getPathInfo();
         switch (action) {
             case "/add":
-                //na?ten� POST parametr? z formul�?e
-                String name = request.getParameter("name");
-                String[] stylesTexts = request.getParameterValues("styles");
-                Region region = Region.valueOf(request.getParameter("region"));
-                Double pricePerHour = Double.parseDouble(request.getParameter("pricePerHour"));
-                Double rate = Double.parseDouble(request.getParameter("rate"));
-
-                List<Style> styles = new ArrayList<>();
-                for (String style : stylesTexts) {
-                    styles.add(Style.valueOf(style));
-                }
-
-                if (name == null
-                        || name.length() == 0
-                        || styles.size() == 0
-                        || region == null
-                        || pricePerHour < 0
-                        || rate < 0) {
-                    request.setAttribute("chyba", "Je nutn� vyplnit v�echny hodnoty spravne!");
-                    showBandsList(request, response);
-                    return;
-                }
-
                 try {
+                    String name = request.getParameter("name");
+                    String[] stylesTexts = request.getParameterValues("styles");
+                    Region region = Region.valueOf(request.getParameter("region"));
+                    Double pricePerHour = Double.parseDouble(request.getParameter("pricePerHour"));
+                    Double rate = Double.parseDouble(request.getParameter("rate"));
 
-                    Band band = new Band();
-                    band.setBandName(name);
-                    band.setStyles(styles);
-                    band.setRegion(region);
-                    band.setPricePerHour(pricePerHour);
-                    band.setRate(rate);
-                    getBandManager().createBand(band);
-                    log.debug("created {}",band);
+                    List<Style> styles = new ArrayList<>();
+                    for (String style : stylesTexts) {
+                        styles.add(Style.valueOf(style));
+                    }
 
-                    response.sendRedirect(request.getContextPath()+URL_MAPPING);
-                    return;
-                } catch (ServiceFailureException e) {
-                    log.error("Cannot add band", e);
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-                    return;
+                    if (name == null
+                            || name.length() == 0
+                            || styles.size() == 0
+                            || region == null
+                            || pricePerHour < 0
+                            || rate < 0) {
+                        throw new Exception("Some field is not correctly filled.");
+                    }
+
+                    try {
+
+                        Band band = new Band();
+                        band.setBandName(name);
+                        band.setStyles(styles);
+                        band.setRegion(region);
+                        band.setPricePerHour(pricePerHour);
+                        band.setRate(rate);
+                        getBandManager().createBand(band);
+                        log.debug("created {}",band);
+
+                        response.sendRedirect(request.getContextPath()+URL_MAPPING);
+                        return;
+                    } catch (ServiceFailureException e) {
+                        log.error("Cannot add band", e);
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        return;
+                    }
+                }
+                catch(Exception ex) {
+                    request.setAttribute("chyba", "Je nutné vyplniť všetky hodnoty správne!");
+                    break;
                 }
             case "/delete":
                 try {
@@ -90,50 +96,65 @@ public class BandsServlet extends HttpServlet {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                     return;
                 }
-            case "/update":
-                //na?ten� POST parametr? z formul�?e
-                String uname = request.getParameter("name");
-                String ustyles = request.getParameter("styles"); //prerobit na list??
-                Region uregion = Region.valueOf(request.getParameter("region"));
-                Double upricePerHour = Double.parseDouble(request.getParameter("pricePerHour"));
-                Double urate = Double.parseDouble(request.getParameter("rate"));
-                long id = Long.parseLong(request.getParameter("id"));
-
-                //kontrola vypln?n� hodnot
-                if (uname == null
-                        || uname.length() == 0
-                        || ustyles == null
-                        || ustyles.length() == 0
-                        || uregion == null
-                        || upricePerHour < 0
-                        || urate < 0
-                        || id <= 0) {
-                    request.setAttribute("chyba", "Je nutn� vyplnit v�echny hodnoty spravne!");
-                    showBandsList(request, response);
-                    return;
-                }
-                //zpracov�n� dat - vytvo?en� z�znamu v datab�zi
+            case "/edit":
                 try {
-                    Band band = new Band();
-                    band.setBandName(uname);
-                    band.setStyles(null); //styly musia byt v liste
-                    band.setRegion(uregion);
-                    band.setPricePerHour(upricePerHour);
-                    band.setRate(urate);
-                    getBandManager().updateBand(band);
-                    log.debug("created {}",band);
-                    //redirect-after-POST je ochrana p?ed v�cen�sobn�m odesl�n�m formul�?e
-                    response.sendRedirect(request.getContextPath()+URL_MAPPING);
-                    return;
-                } catch (ServiceFailureException e) {
-                    log.error("Cannot add band", e);
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-                    return;
+                    Long eid = Long.valueOf(request.getParameter("id"));
+                    request.setAttribute("editBand", getBandManager().findBandById(eid));
+                }
+                catch (Exception ex) {
+                    request.setAttribute("chyba", "ID kapely nie je platné!");
+                }
+                break;
+            case "/update":
+                try {
+                    String uname = request.getParameter("name");
+                    String[] ustylesTexts = request.getParameterValues("styles");
+                    Region uregion = Region.valueOf(request.getParameter("region"));
+                    Double upricePerHour = Double.parseDouble(request.getParameter("pricePerHour"));
+                    Double urate = Double.parseDouble(request.getParameter("rate"));
+                    long id = Long.parseLong(request.getParameter("id"));
+
+                    List<Style> ustyles = new ArrayList<>();
+                    for (String ustyle : ustylesTexts) {
+                        ustyles.add(Style.valueOf(ustyle));
+                    }
+                    if (uname == null
+                            || uname.length() == 0
+                            || ustyles.size() == 0
+                            || uregion == null
+                            || upricePerHour < 0
+                            || urate < 0) {
+                        throw new Exception("Some field is not correctly filled.");
+                    }
+
+                    try {
+                        Band band = getBandManager().findBandById(id);
+                        band.setBandName(uname);
+                        band.setStyles(ustyles);
+                        band.setRegion(uregion);
+                        band.setPricePerHour(upricePerHour);
+                        band.setRate(urate);
+                        getBandManager().updateBand(band);
+                        log.debug("updated {}",band);
+
+                        response.sendRedirect(request.getContextPath()+URL_MAPPING);
+                        return;
+                    } catch (ServiceFailureException e) {
+                        log.error("Cannot update band", e);
+                        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        return;
+                    }
+                }
+                catch(Exception ex) {
+                    request.setAttribute("chyba", "Je nutné vyplniť všetky hodnoty správne!");
+                    break;
                 }
             default:
                 log.error("Unknown action " + action);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unknown action " + action);
+                return;
         }
+        showBandsList(request, response);
     }
 
     /**
@@ -151,6 +172,8 @@ public class BandsServlet extends HttpServlet {
     private void showBandsList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             request.setAttribute("bands", getBandManager().getAllBands());
+            request.setAttribute("styles", Style.values());
+            request.setAttribute("regions", Region.values());
             request.getRequestDispatcher(LIST_JSP).forward(request, response);
         } catch (Exception e) {
             log.error("Cannot show bands", e);
