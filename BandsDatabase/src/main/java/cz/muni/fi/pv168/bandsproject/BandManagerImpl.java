@@ -328,7 +328,7 @@ public class BandManagerImpl implements BandManager{
         try {
             resultList = DBUtilsBand.selectBandsFromDBWhere(collection,
                     "rate>=number($argument0)", new String[]{String.valueOf(from)});
-        }catch(XMLDBException ex){
+        } catch(XMLDBException ex) {
             log.log(Level.SEVERE, "XMLDBException:"+ex);
             throw new DBException("Error while getting bands less rate", ex);
         }

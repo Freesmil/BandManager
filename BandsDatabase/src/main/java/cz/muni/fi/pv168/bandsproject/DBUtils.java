@@ -35,10 +35,10 @@ public class DBUtils {
 
         if(condition != null && !condition.isEmpty()) {
             xQuery = "let $doc := doc($document) " +
-                    "return $doc/bands/customer[" + condition + "]";
+                    "return $doc/customers/customer[" + condition + "]";
         }else{
             xQuery = "let $doc := doc($document) " +
-                    "return $doc/bands/customer";
+                    "return $doc/customers/customer";
         }
 
         XQueryService service = (XQueryService) collection.getService("XQueryService", "1.0");
@@ -190,7 +190,23 @@ public class DBUtils {
         }
     }
 
-    public static Collection createCustomerCollection() throws IllegalAccessException, InstantiationException, ClassNotFoundException, XMLDBException {
+    public static void createIfNotExistsCustomerResource() throws IllegalAccessException, InstantiationException, ClassNotFoundException, XMLDBException {
+        Properties configProperty = new ConfigProperty();
+        Collection collection = loadOrCreateDatabaseCollection();
+
+        XMLResource resource = (XMLResource)collection.getResource(configProperty.getProperty("db_bandResourceName"));
+        if (resource == null) {
+            resource = (XMLResource) collection.createResource(configProperty.getProperty("db_customerResourceName"), "XMLResource");
+            resource.setContent("<customers></customers>");
+            collection.storeResource(resource);
+
+            resource = (XMLResource) collection.createResource(configProperty.getProperty("db_metaData"), "XMLResource");
+            resource.setContent("<data><customer-next-id>1</customer-next-id></data>");
+            collection.storeResource(resource);
+        }
+    }
+
+    public static Collection loadOrCreateDatabaseCollection() throws IllegalAccessException, InstantiationException, ClassNotFoundException, XMLDBException {
         Properties configProperty = new ConfigProperty();
 
         Class c = Class.forName(configProperty.getProperty("db_driver"));
@@ -200,38 +216,24 @@ public class DBUtils {
 
         Collection collection = DatabaseManager.getCollection(configProperty.getProperty("db_prefix") + configProperty.getProperty("db_collection"), configProperty.getProperty("db_name"), configProperty.getProperty("db_password"));
 
-        org.xmldb.api.base.Collection parent = DatabaseManager.getCollection(configProperty.getProperty("db_prefix"), configProperty.getProperty("db_name"), configProperty.getProperty("db_password"));
-        CollectionManagementService mgt = (CollectionManagementService) parent.getService("CollectionManagementService", "1.0");
-        mgt.createCollection(configProperty.getProperty("db_collection"));
-        parent.close();
-        collection = DatabaseManager.getCollection(configProperty.getProperty("db_prefix") + configProperty.getProperty("db_collection"), configProperty.getProperty("db_name"), configProperty.getProperty("db_password"));
-
-        XMLResource resource = (XMLResource) collection.createResource(configProperty.getProperty("db_customerResourceName"), "XMLResource");
-        resource.setContent("<customers></customers>");
-        collection.storeResource(resource);
-
-        resource = (XMLResource) collection.createResource(configProperty.getProperty("db_metaData"), "XMLResource");
-        resource.setContent("<data><customer-next-id>1</customer-next-id></data>");
-        collection.storeResource(resource);
+        if (collection == null) {
+            org.xmldb.api.base.Collection parent = DatabaseManager.getCollection(configProperty.getProperty("db_prefix"), configProperty.getProperty("db_name"), configProperty.getProperty("db_password"));
+            CollectionManagementService mgt = (CollectionManagementService) parent.getService("CollectionManagementService", "1.0");
+            mgt.createCollection(configProperty.getProperty("db_collection"));
+            parent.close();
+            collection = DatabaseManager.getCollection(configProperty.getProperty("db_prefix") + configProperty.getProperty("db_collection"), configProperty.getProperty("db_name"), configProperty.getProperty("db_password"));
+        }
 
         return collection;
     }
 
-    public static Collection loadCustomerCollection() throws IllegalAccessException, InstantiationException, ClassNotFoundException, XMLDBException {
+    public static void dropDatabaseCollection() throws IllegalAccessException, InstantiationException, ClassNotFoundException, XMLDBException {
         Properties configProperty = new ConfigProperty();
 
         Class c = Class.forName(configProperty.getProperty("db_driver"));
         Database database = (Database) c.newInstance();
         database.setProperty("create-database", "true");
         DatabaseManager.registerDatabase(database);
-
-        Collection collection = DatabaseManager.getCollection(configProperty.getProperty("db_prefix") + configProperty.getProperty("db_collection"), configProperty.getProperty("db_name"), configProperty.getProperty("db_password"));
-
-        return collection;
-    }
-
-    public static void dropCustomerDatabase() throws XMLDBException{
-        Properties configProperty = new ConfigProperty();
 
         org.xmldb.api.base.Collection parent = DatabaseManager.getCollection(configProperty.getProperty("db_prefix"),configProperty.getProperty("db_name"),configProperty.getProperty("db_password"));
         CollectionManagementService mgt = (CollectionManagementService) parent.getService("CollectionManagementService", "1.0");
