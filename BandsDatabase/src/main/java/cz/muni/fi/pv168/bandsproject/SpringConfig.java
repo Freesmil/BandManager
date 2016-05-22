@@ -68,7 +68,8 @@ public class SpringConfig {
     }
 
     @Bean
-    public LeaseManager leaseManager() {
-        return new LeaseManagerImpl(dataSource());
+    public LeaseManager leaseManager() throws Exception {
+        DBUtilsLease.createIfNotExistsLeaseResource();
+        return new LeaseManagerImpl(collection);
     }
 }

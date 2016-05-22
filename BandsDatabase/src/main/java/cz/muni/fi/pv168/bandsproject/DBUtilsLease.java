@@ -299,4 +299,7 @@ public class DBUtilsLease {
         mgt.removeCollection(configProperty.getProperty("db_prefix") + configProperty.getProperty("db_collection"));
         parent.close();
     }
+
+    public static void createIfNotExistsLeaseResource() {
+    }
 }

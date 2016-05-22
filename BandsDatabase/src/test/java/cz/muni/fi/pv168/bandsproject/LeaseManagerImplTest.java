@@ -47,13 +47,9 @@ public class LeaseManagerImplTest {
 
     @After
     public void tearDown() throws Exception {
-        DBUtilsLease.dropLeaseDatabase();
+        DBUtils.dropDatabaseCollection();
         collection.close();
-
-        DBUtils.dropCustomerDatabase();
         collectionCus.close();
-
-        DBUtilsBand.dropBandDatabase();
         collectionBand.close();
     }
     

@@ -73,9 +73,8 @@ public class MySpringTestConfig {
 
     @Bean
     public LeaseManager leaseManager() throws Exception {
-        LeaseManagerImpl leaseManager = new LeaseManagerImpl(dataSource());
-        leaseManager.setBandManager(bandManager());
-        leaseManager.setCustomerManager(customerManager());
-        return leaseManager;
+        DBUtilsLease.createIfNotExistsLeaseResource();
+        //return new CustomerManagerImpl(collection);
+        return null;
     }
 }
