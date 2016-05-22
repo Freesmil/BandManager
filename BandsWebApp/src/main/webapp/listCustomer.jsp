@@ -34,7 +34,9 @@
             <ul class="nav navbar-nav">
                 <li><a href="${pageContext.request.contextPath}/">Home</a></li>
                 <li><a href="${pageContext.request.contextPath}/bands/">Bands</a></li>
+                <li><a href="${pageContext.request.contextPath}/leases/">Leases</a></li>
                 <li class="active"><a href="${pageContext.request.contextPath}/customers/">Customers</a></li>
+                <li><a href="${pageContext.request.contextPath}/xml/">Import/Export</a></li>
             </ul>
         </div>
     </div>
