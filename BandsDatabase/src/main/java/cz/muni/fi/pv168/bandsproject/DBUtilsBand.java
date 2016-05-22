@@ -85,7 +85,7 @@ public class DBUtilsBand {
             service.declareVariable("pricePerHour", band.getPricePerHour());
             service.declareVariable("rate", band.getRate());
         }catch(XMLDBException ex){
-            log.log(Level.SEVERE, "XMLDBException in DBUtils:"+ex);
+            log.log(Level.SEVERE, "XMLDBException in DBUtilsBand:"+ex);
             throw new DBException("Error while binding band.", ex);
 
         }
@@ -106,19 +106,19 @@ public class DBUtilsBand {
             if(results.hasMoreResources()) {
                 Long id = Long.parseLong(results.nextResource().getContent().toString());
                 if(results.hasMoreResources()){
-                    log.log(Level.SEVERE, "DBException in DBUtils:dataB.xml has more band-next-id element");
+                    log.log(Level.SEVERE, "DBException in DBUtilsBand:dataB.xml has more band-next-id element");
                     throw new DBException("dataB.xml has more band-next-id element");
                 }
                 return id;
             }else{
-                log.log(Level.SEVERE, "DBException in DBUtils: Next id does not exist");
+                log.log(Level.SEVERE, "DBException in DBUtilsBand: Next id does not exist");
                 throw new DBException("Next id does not exist");
             }
         }catch (XMLDBException ex) {
-            log.log(Level.SEVERE, "XMLDBException in DBUtils:" + ex);
+            log.log(Level.SEVERE, "XMLDBException in DBUtilsBand:" + ex);
             throw new DBException("Error while getting next id", ex);
         }catch (NumberFormatException ex){
-            log.log(Level.SEVERE, "NumberFormatException in DBUtils:"+ex);
+            log.log(Level.SEVERE, "NumberFormatException in DBUtilsBand:"+ex);
             throw new DBException("Error while parsing next id", ex);
         }
     }
@@ -136,10 +136,10 @@ public class DBUtilsBand {
 
             service.execute(compiled);
         }catch (XMLDBException ex) {
-            log.log(Level.SEVERE, "XMLDBException in DBUtils:"+ex);
+            log.log(Level.SEVERE, "XMLDBException in DBUtilsBand:"+ex);
             throw new DBException("Error while incrementing", ex);
         }catch (NumberFormatException ex){
-            log.log(Level.SEVERE, "NumberFormatException in DBUtils:"+ex);
+            log.log(Level.SEVERE, "NumberFormatException in DBUtilsBand:"+ex);
             throw new DBException("Error while parsing next id", ex);
         }
     }
@@ -160,7 +160,7 @@ public class DBUtilsBand {
 
                 a = parent.getElementsByTagName("name");
                 if(a.getLength() != 1){
-                    log.log(Level.SEVERE, "BandException in DBUtils: Error while parsing name");
+                    log.log(Level.SEVERE, "BandException in DBUtilsBand: Error while parsing name");
                     throw new BandException("Error while parsing name");
                 }
                 Element el = (Element) a.item(0);
@@ -168,7 +168,7 @@ public class DBUtilsBand {
 
                 a = parent.getElementsByTagName("styles");
                 if(a.getLength() != 1){
-                    log.log(Level.SEVERE, "BandException in DBUtils: Error while parsing styles");
+                    log.log(Level.SEVERE, "BandException in DBUtilsBand: Error while parsing styles");
                     throw new BandException("Error while parsing styles");
                 }
                 el = (Element) a.item(0);
@@ -183,7 +183,7 @@ public class DBUtilsBand {
 
                 a = parent.getElementsByTagName("region");
                 if(a.getLength() != 1){
-                    log.log(Level.SEVERE, "BandException in DBUtils: Error while parsing region");
+                    log.log(Level.SEVERE, "BandException in DBUtilsBand: Error while parsing region");
                     throw new BandException("Error while parsing region");
                 }
                 el = (Element) a.item(0);
@@ -191,46 +191,46 @@ public class DBUtilsBand {
 
                 a = parent.getElementsByTagName("pricePerHour");
                 if(a.getLength() != 1){
-                    log.log(Level.SEVERE, "BandException in DBUtils: Error while parsing pricePerHour");
+                    log.log(Level.SEVERE, "BandException in DBUtilsBand: Error while parsing pricePerHour");
                     throw new BandException("Error while parsing pricePerHour");
                 }
                 el = (Element) a.item(0);
                 try {
                     band.setPricePerHour(Double.parseDouble(el.getTextContent()));
                 }catch(NumberFormatException ex){
-                    log.log(Level.SEVERE, "CarException in DBUtils: Error while parsing double");
+                    log.log(Level.SEVERE, "BandException in DBUtilsBand: Error while parsing double");
                     throw new BandException("Error while parsing double");
                 }
 
                 a = parent.getElementsByTagName("rate");
                 if(a.getLength() != 1){
-                    log.log(Level.SEVERE, "BandException in DBUtils: Error while parsing rate");
+                    log.log(Level.SEVERE, "BandException in DBUtilsBand: Error while parsing rate");
                     throw new BandException("Error while parsing rate");
                 }
                 el = (Element) a.item(0);
                 try {
                     band.setRate(Double.parseDouble(el.getTextContent()));
                 }catch(NumberFormatException ex){
-                    log.log(Level.SEVERE, "CarException in DBUtils: Error while parsing double");
+                    log.log(Level.SEVERE, "BandException in DBUtilsBnad: Error while parsing double");
                     throw new BandException("Error while parsing double");
                 }
 
                 return band;
 
             } catch (SAXException e) {
-                log.log(Level.SEVERE, "SAXException in DBUtils:"+e);
+                log.log(Level.SEVERE, "SAXException in DBUtilsBand:"+e);
                 throw new BandException("Error creating document from xml for parsing");
             } catch (IOException e) {
-                log.log(Level.SEVERE, "IOException in DBUtils:"+e);
+                log.log(Level.SEVERE, "IOException in DBUtilsBand:"+e);
                 throw new BandException("Error parsing band");
             }
         } catch (ParserConfigurationException ex) {
-            log.log(Level.SEVERE, "ParseFormatException in DBUtils:"+ex);
+            log.log(Level.SEVERE, "ParseFormatException in DBUtilsBand:"+ex);
             throw new BandException("Error while configure parser", ex);
         }
     }
 
-    public static Collection loadOrCreateBandCollection() throws IllegalAccessException, InstantiationException, ClassNotFoundException, XMLDBException {
+    public static Collection createBandCollection() throws IllegalAccessException, InstantiationException, ClassNotFoundException, XMLDBException {
         Properties configProperty = new ConfigProperty();
 
         Class c = Class.forName(configProperty.getProperty("db_driver"));
@@ -240,21 +240,32 @@ public class DBUtilsBand {
 
         Collection collection = DatabaseManager.getCollection(configProperty.getProperty("db_prefix") + configProperty.getProperty("db_collection"), configProperty.getProperty("db_name"), configProperty.getProperty("db_password"));
 
-        if (collection == null) {
-            org.xmldb.api.base.Collection parent = DatabaseManager.getCollection(configProperty.getProperty("db_prefix"), configProperty.getProperty("db_name"), configProperty.getProperty("db_password"));
-            CollectionManagementService mgt = (CollectionManagementService) parent.getService("CollectionManagementService", "1.0");
-            mgt.createCollection(configProperty.getProperty("db_collection"));
-            parent.close();
-            collection = DatabaseManager.getCollection(configProperty.getProperty("db_prefix") + configProperty.getProperty("db_collection"), configProperty.getProperty("db_name"), configProperty.getProperty("db_password"));
+        org.xmldb.api.base.Collection parent = DatabaseManager.getCollection(configProperty.getProperty("db_prefix"), configProperty.getProperty("db_name"), configProperty.getProperty("db_password"));
+        CollectionManagementService mgt = (CollectionManagementService) parent.getService("CollectionManagementService", "1.0");
+        mgt.createCollection(configProperty.getProperty("db_collection"));
+        parent.close();
+        collection = DatabaseManager.getCollection(configProperty.getProperty("db_prefix") + configProperty.getProperty("db_collection"), configProperty.getProperty("db_name"), configProperty.getProperty("db_password"));
 
-            XMLResource resource = (XMLResource) collection.createResource(configProperty.getProperty("db_bandResourceName"), "XMLResource");
-            resource.setContent("<bands></bands>");
-            collection.storeResource(resource);
+        XMLResource resource = (XMLResource) collection.createResource(configProperty.getProperty("db_bandResourceName"), "XMLResource");
+        resource.setContent("<bands></bands>");
+        collection.storeResource(resource);
 
-            resource = (XMLResource) collection.createResource(configProperty.getProperty("db_metaDataBand"), "XMLResource");
-            resource.setContent("<dataB><band-next-id>1</band-next-id></dataB>");
-            collection.storeResource(resource);
-        }
+        resource = (XMLResource) collection.createResource(configProperty.getProperty("db_metaDataBand"), "XMLResource");
+        resource.setContent("<dataB><band-next-id>1</band-next-id></dataB>");
+        collection.storeResource(resource);
+
+        return collection;
+    }
+
+    public static Collection loadBandCollection() throws IllegalAccessException, InstantiationException, ClassNotFoundException, XMLDBException {
+        Properties configProperty = new ConfigProperty();
+
+        Class c = Class.forName(configProperty.getProperty("db_driver"));
+        Database database = (Database) c.newInstance();
+        database.setProperty("create-database", "true");
+        DatabaseManager.registerDatabase(database);
+
+        Collection collection = DatabaseManager.getCollection(configProperty.getProperty("db_prefix") + configProperty.getProperty("db_collection"), configProperty.getProperty("db_name"), configProperty.getProperty("db_password"));
 
         return collection;
     }

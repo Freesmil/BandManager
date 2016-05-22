@@ -29,7 +29,7 @@ public class BandManagerImplTest {
 
     @Before
     public void setUp() throws Exception {
-        collection = DBUtilsBand.loadOrCreateBandCollection();
+        collection = DBUtilsBand.createBandCollection();
         bandManager = new BandManagerImpl(collection);
     }
 

@@ -54,8 +54,7 @@ public class SpringConfig {
         catch (Exception ex) {
             //ok
         }
-        return new CustomerManagerImpl(DBUtils.loadOrCreateCustomerCollection());
-//        return null; //new CustomerManagerImpl(dataSource());
+        return new CustomerManagerImpl(DBUtils.createCustomerCollection());
     }
 
     @Bean
@@ -66,12 +65,11 @@ public class SpringConfig {
         catch (Exception ex) {
             //ok
         }
-        return new BandManagerImpl(DBUtilsBand.loadOrCreateBandCollection());
-//        return null; //new BandManagerImpl(new TransactionAwareDataSourceProxy(dataSource()));
+        return new BandManagerImpl(DBUtilsBand.createBandCollection());
     }
 
     @Bean
     public LeaseManager leaseManager() {
-        return new LeaseManagerImpl(dataSource());
+        return null;
     }
 }

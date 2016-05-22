@@ -54,9 +54,9 @@ public class MySpringTestConfig {
 
     @Bean
     public LeaseManager leaseManager() {
-        LeaseManagerImpl leaseManager = new LeaseManagerImpl(dataSource());
-        leaseManager.setBandManager(bandManager());
-        leaseManager.setCustomerManager(customerManager());
-        return leaseManager;
+        //LeaseManagerImpl leaseManager = new LeaseManagerImpl(dataSource());
+        //leaseManager.setBandManager(bandManager());
+        //leaseManager.setCustomerManager(customerManager());
+        return null; //leaseManager;
     }
 }

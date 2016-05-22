@@ -6,10 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
 import java.util.Date;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,31 +16,46 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import org.apache.derby.jdbc.EmbeddedDataSource;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
-
 import static org.junit.Assert.*;
 
 /**
  * Created by Lenka on 18.3.2016.
  */
-@RunWith(SpringJUnit4ClassRunner.class) //Spring se zúčastní unit testů
-@ContextConfiguration(classes = {MySpringTestConfig.class}) //konfigurace je ve třídě MySpringTestConfig
-@Transactional //každý test poběží ve vlastní transakci, která bude na konci rollbackována
 public class LeaseManagerImplTest {
-    @Autowired
-    private LeaseManager leaseManager;
-    @Autowired
-    private BandManager bandManager;
-    @Autowired
-    private CustomerManager customerManager;
-
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    private LeaseManagerImpl leaseManager;
+    private CustomerManagerImpl customerManager;
+    private BandManagerImpl bandManager;
+
+    private org.xmldb.api.base.Collection collection;
+    private org.xmldb.api.base.Collection collectionCus;
+    private org.xmldb.api.base.Collection collectionBand;
+
+    @Before
+    public void setUp() throws Exception {
+        collection = DBUtilsLease.createLeaseCollection();
+        leaseManager = new LeaseManagerImpl(collection);
+
+        collectionCus = DBUtils.createCustomerCollection();
+        customerManager = new CustomerManagerImpl(collectionCus);
+
+        collectionBand = DBUtilsBand.createBandCollection();
+        bandManager = new BandManagerImpl(collectionBand);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        DBUtilsLease.dropLeaseDatabase();
+        collection.close();
+
+        DBUtils.dropCustomerDatabase();
+        collectionCus.close();
+
+        DBUtilsBand.dropBandDatabase();
+        collectionBand.close();
+    }
     
     @Test
     public void testCreateLease() throws Exception {
@@ -113,7 +125,7 @@ public class LeaseManagerImplTest {
         leaseManager.createLease(lease2);
         
         
-        DateFormat format = new SimpleDateFormat("dd.mm.yyyy");
+        DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         
         // ---- Duration
         lease.setDuration(50);
@@ -227,7 +239,7 @@ public class LeaseManagerImplTest {
         Customer customer = newCustomer("Pepa", "666 123 456", "Kartouzska 69");
         customerManager.createCustomer(customer);
         
-        Lease lease = newLease(band, customer, "01.02.2016", Region.jihocesky, 2);
+        Lease lease = newLease(band, customer, "11.02.2016", Region.jihocesky, 2);
         leaseManager.createLease(lease);
         Long leaseId = lease.getId();
         
@@ -237,7 +249,7 @@ public class LeaseManagerImplTest {
 
     @Test
     public void testFindAllLeases() throws Exception {
-        SimpleDateFormat sfd = new SimpleDateFormat("dd.mm.yyyy");
+        SimpleDateFormat sfd = new SimpleDateFormat("dd.MM.yyyy");
         
         Collection<Lease> allCustomers = leaseManager.findAllLeases();
         
@@ -333,7 +345,7 @@ public class LeaseManagerImplTest {
 
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testFindLeasesForBandWithWrongArgument() throws Exception {
         Collection<Lease> leasesForBand = new ArrayList<>();
 
@@ -400,7 +412,7 @@ public class LeaseManagerImplTest {
         assertDeepEquals(lease2,getLease);
     }
     
-    @Test(expected = NullPointerException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testFindLeasesForCustomerWithWrongArgument() throws Exception {
         Collection<Lease> leasesForCustomer = new ArrayList<>();    
         
@@ -445,7 +457,7 @@ public class LeaseManagerImplTest {
         lease.setBand(band);
         lease.setCustomer(customer);
         
-        DateFormat format = new SimpleDateFormat("dd.mm.yyyy");
+        DateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         Date date = format.parse(sDate);
         lease.setDate(date);
         

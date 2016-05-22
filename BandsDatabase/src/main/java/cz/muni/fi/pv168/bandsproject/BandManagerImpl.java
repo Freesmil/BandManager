@@ -25,7 +25,8 @@ public class BandManagerImpl implements BandManager{
 
     @Override
     public void createBand(Band band) throws ServiceFailureException {
-        validate(band);log.log(Level.INFO, "Create band in band manager: " + band);
+        validate(band);
+        log.log(Level.INFO, "Create band in band manager: " + band);
         if(band.getId() != null){
             log.log(Level.SEVERE, "Band exception: Band id must be null");
             throw new BandException("Band id must be null");
@@ -155,46 +156,6 @@ public class BandManagerImpl implements BandManager{
             throw new DBException("Error while deleting band", ex);
         }
     }
-    
-    @Override
-    public void createStylesBand(Long id, List<Style> styles) throws ServiceFailureException {
-        /*for(Style style : styles){
-            SimpleJdbcInsert insertStyles = new SimpleJdbcInsert(jdbcTemplateObject).withTableName("band_styles").usingGeneratedKeyColumns("id");
-            Map<String, Object> parameters = new HashMap<>(2);
-            parameters.put("idBand", id);
-            parameters.put("style", style.ordinal());
-            insertStyles.executeAndReturnKey(parameters);
-        }*/
-    }
-    
-    @Override
-    public void updateStylesBand(Long id, List<Style> styles) throws ServiceFailureException {
-        /*deleteStylesBand(id);
-        for(Style style : styles){
-            SimpleJdbcInsert insertStyles = new SimpleJdbcInsert(jdbcTemplateObject).withTableName("band_styles").usingGeneratedKeyColumns("id");
-            Map<String, Object> parameters = new HashMap<>(2);
-            parameters.put("idBand", id);
-            parameters.put("style", style.ordinal());
-            insertStyles.executeAndReturnKey(parameters);
-        }*/
-    }
-    
-    @Override
-    public void deleteStylesBand(Long id) throws ServiceFailureException {
-        /*if (id == null) {
-            throw new IllegalArgumentException("band is null");
-        }
-        
-        jdbcTemplateObject.update("DELETE FROM band_styles WHERE idBand = ?", id);*/
-    }
-    
-    @Override
-    public List<Style> getStylesBand(Long id) throws ServiceFailureException {
-       /* List<Style> styles = jdbcTemplateObject.query("SELECT style FROM band_styles WHERE idBand = ?", (ResultSet rs, int rowNum) -> Style.values()[rs.getInt("style")], id);
-
-        return styles;*/
-        return null;
-    }
 
     @Override
     public Collection<Band> getAllBands() {
@@ -254,7 +215,7 @@ public class BandManagerImpl implements BandManager{
 
     @Override
     public Collection<Band> findBandByName(String name) throws ServiceFailureException {
-        log.log(Level.INFO, "Get car by name " + name + " in band manager");
+        log.log(Level.INFO, "Get band by name " + name + " in band manager");
         if(name == null){
             log.log(Level.SEVERE, "IlegalArgumentException : name is null");
             throw new IllegalArgumentException("name is null");

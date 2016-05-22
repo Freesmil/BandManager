@@ -26,7 +26,7 @@ public class CustomerManagerImplTest {
 
     @Before
     public void setUp() throws Exception {
-        collection = DBUtils.loadOrCreateCustomerCollection();
+        collection = DBUtils.createCustomerCollection();
         customerManager = new CustomerManagerImpl(collection);
     }
 

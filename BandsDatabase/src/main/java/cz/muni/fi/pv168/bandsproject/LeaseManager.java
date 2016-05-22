@@ -1,5 +1,6 @@
 package cz.muni.fi.pv168.bandsproject;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -23,9 +24,9 @@ public interface LeaseManager {
 
     public Lease findLeaseById(Long id);
 
-    public List<Lease> findAllLeases();
+    public Collection<Lease> findAllLeases();
 
-    public List<Lease> findLeasesForCustomer(Customer customer);
+    public Collection<Lease> findLeasesForCustomer(Customer customer);
 
-    public List<Lease> findLeasesForBand(Band band);
+    public Collection<Lease> findLeasesForBand(Band band);
 }

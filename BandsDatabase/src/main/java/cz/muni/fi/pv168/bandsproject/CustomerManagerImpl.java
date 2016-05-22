@@ -21,7 +21,8 @@ public class CustomerManagerImpl implements CustomerManager {
 
     @Override
     public void createCustomer(Customer customer) {
-        validate(customer);log.log(Level.INFO, "Create customer in customer manager: " + customer);
+        validate(customer);
+        log.log(Level.INFO, "Create customer in customer manager: " + customer);
         if(customer.getId() != null){
             log.log(Level.SEVERE, "Customer exception: Customer id must be null");
             throw new CustomerException("Customer id must be null");
