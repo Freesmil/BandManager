@@ -193,7 +193,7 @@ public class CustomerManagerImpl implements CustomerManager {
             log.log(Level.SEVERE, "XMLDBException:"+ex);
             throw new DBException("Error while getting all customers", ex);
         }
-        log.log(Level.INFO, "Get all customers is OK");
+        log.log(Level.INFO, "Get all customers is OK - number of customers: " + resultList.size());
         return resultList;
 }
 

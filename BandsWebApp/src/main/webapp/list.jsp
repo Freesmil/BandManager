@@ -43,17 +43,17 @@
 <div class="container theme-showcase" role="main">
     <div class="row">
         <div class="col-md-8">
-            <h2>Filtrovanie <a href="#filters" class="filtersButton"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></a></h2>
+            <h2>Filter <a href="#filters" class="filtersButton"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></a></h2>
             <div style="display: none" class="filterWindow">
                 <form action="${pageContext.request.contextPath}/bands/filter" method="post">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="filterName">Nazev kapely:</label>
-                                <input type="text" name="name" id="filterName" value="" class="form-control" placeholder="Meno">
+                                <label for="filterName">Name:</label>
+                                <input type="text" name="name" id="filterName" value="" class="form-control" placeholder="Name">
                             </div>
                             <div class="form-group">
-                                <label for="filterStyles">Styly:</label>
+                                <label for="filterStyles">Styles:</label>
                                 <select id="filterStyles" multiple class="form-control" name="styles">
                                     <c:forEach items="${styles}" var="style">
                                         <option>${style.name()}</option>
@@ -72,45 +72,47 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="filterRate">Minimalny rate:</label>
-                                <input type="text" name="rate" id="filterRate" value="" class="form-control" placeholder="Minimalny rate">
+                                <label for="filterRate">Minimal rate:</label>
+                                <input type="text" name="rate" id="filterRate" value="" class="form-control" placeholder="Minimal rate">
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <div class="form-group">
-                                <label for="filterPricePerHourFrom">Cena za hodinu od:</label>
-                                <input type="text" name="pricePerHourFrom" id="filterPricePerHourFrom" value="" class="form-control" placeholder="Cena za hodinu od">
+                                <label for="filterPricePerHourFrom">Price per hour from:</label>
+                                <input type="text" name="pricePerHourFrom" id="filterPricePerHourFrom" value="" class="form-control" placeholder="Price per hour from">
                             </div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="form-group">
-                                <label for="filterPricePerHourTo">Cena za hodinu do:</label>
-                                <input type="text" name="pricePerHourTo" id="filterPricePerHourTo" value="" class="form-control" placeholder="Cena za hodinu do">
+                                <label for="filterPricePerHourTo">Price per hour to:</label>
+                                <input type="text" name="pricePerHourTo" id="filterPricePerHourTo" value="" class="form-control" placeholder="Price per hour to">
                             </div>
                         </div>
                     </div>
 
-                    <input type="Submit" class="btn btn-default" value="Filtrovat"/>
+                    <input type="Submit" class="btn btn-default" value="Filter"/>
                 </form>
             </div>
-            <h2>Zoznam kapiel</h2>
+            <h2>Bands list</h2>
             <table class="table">
                 <thead>
                 <tr>
-                    <th>Nazev kapely</th>
-                    <th>Styly</th>
+                    <th>Name</th>
+                    <th>Styles</th>
                     <th>Region</th>
-                    <th>Cena za hodinu</th>
-                    <th>Hodnoceni</th>
+                    <th>Price per hour</th>
+                    <th>Rate</th>
                 </tr>
                 </thead>
                 <c:forEach items="${bands}" var="band">
                     <tr>
-                        <td align="center"><c:out value="${band.name}"/></td>
+                        <td align="left"><c:out value="${band.name}"/></td>
                         <td align="center"><c:out value="${band.styles.toString()}"/></td>
                         <td align="center"><c:out value="${band.region}"/></td>
                         <td align="center"><c:out value="${band.pricePerHour}"/></td>
                         <td align="center"><c:out value="${band.rate}"/></td>
-                        <td align="left"><form method="post" action="${pageContext.request.contextPath}/bands/edit?id=${band.id}"><input type="submit" value="Upravit" class="btn btn-info"></form></td>
-                        <td align="left"><form method="post" action="${pageContext.request.contextPath}/bands/delete?id=${band.id}"><input type="submit" value="Smazat" class="btn btn-danger"></form></td>
+                        <td align="right"><form method="post" action="${pageContext.request.contextPath}/bands/edit?id=${band.id}"><input type="submit" value="Edit" class="btn btn-info"></form></td>
+                        <td align="right"><form method="post" action="${pageContext.request.contextPath}/bands/delete?id=${band.id}"><input type="submit" value="Remove" class="btn btn-danger"></form></td>
                     </tr>
                 </c:forEach>
             </table>
@@ -119,15 +121,15 @@
         <div class="col-md-4">
 
             <c:if test="${not empty editBand}">
-                <h2>Zmente kapelu</h2>
+                <h2>Edit band</h2>
             </c:if>
             <c:if test="${empty editBand}">
-                <h2>Zadejte kapelu</h2>
+                <h2>New band</h2>
             </c:if>
             <c:if test="${not empty chyba}">
                 <div class="alert alert-danger" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                    <span class="sr-only">Chyba:</span>
+                    <span class="sr-only">Error:</span>
                     <c:out value="${chyba}"/>
                 </div>
             </c:if>
@@ -136,11 +138,11 @@
                 <form action="${pageContext.request.contextPath}/bands/update" method="post" id="editForm">
                     <input type="hidden" name="id" value="${editBand.id}">
                     <div class="form-group">
-                        <label for="uinputName">Nazev kapely:</label>
-                        <input type="text" name="name" id="uinputName" value="<c:out value="${editBand.name}"/>" class="form-control" placeholder="Meno">
+                        <label for="uinputName">Name:</label>
+                        <input type="text" name="name" id="uinputName" value="<c:out value="${editBand.name}"/>" class="form-control" placeholder="Name">
                     </div>
                     <div class="form-group">
-                        <label for="uinputStyles">Styly:</label>
+                        <label for="uinputStyles">Styles:</label>
                         <select id="uinputStyles" multiple class="form-control" name="styles">
                             <c:forEach items="${styles}" var="style">
                                 <option <c:if test="${editBand.styles.contains(style)}">selected</c:if>>${style.name()}</option>
@@ -157,27 +159,27 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="uinputPricePerHour">Cena za hodinu:</label>
-                        <input type="text" name="pricePerHour" id="uinputPricePerHour" value="<c:out value="${editBand.pricePerHour}"/>" class="form-control" placeholder="Cena za hodinu">
+                        <label for="uinputPricePerHour">Price per hour:</label>
+                        <input type="text" name="pricePerHour" id="uinputPricePerHour" value="<c:out value="${editBand.pricePerHour}"/>" class="form-control" placeholder="Price per hour">
                     </div>
                     <div class="form-group">
                         <label for="uinputRate">Rate:</label>
                         <input type="text" name="rate" id="uinputRate" value="<c:out value="${editBand.rate}"/>" class="form-control" placeholder="Rate">
                     </div>
 
-                    <input type="Submit" class="btn btn-success" value="Upravit" />
-                    <a href="${pageContext.request.contextPath}/bands/" class="btn btn-warning">Zrusit</a>
+                    <input type="Submit" class="btn btn-success" value="Save" />
+                    <a href="${pageContext.request.contextPath}/bands/" class="btn btn-warning">Cancel</a>
                 </form>
             </c:if>
 
             <c:if test="${empty editBand}">
                 <form action="${pageContext.request.contextPath}/bands/add" method="post" id="editForm">
                     <div class="form-group">
-                        <label for="inputName">Nazev kapely:</label>
-                        <input type="text" name="name" id="inputName" value="<c:out value="${param.name}"/>" class="form-control" placeholder="Meno">
+                        <label for="inputName">Name:</label>
+                        <input type="text" name="name" id="inputName" value="<c:out value="${param.name}"/>" class="form-control" placeholder="Name">
                     </div>
                     <div class="form-group">
-                        <label for="inputStyles">Styly:</label>
+                        <label for="inputStyles">Styles:</label>
                         <select id="inputStyles" multiple class="form-control" name="styles">
                             <c:forEach items="${styles}" var="style">
                                 <option>${style.name()}</option>
@@ -193,15 +195,15 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="inputPricePerHour">Cena za hodinu:</label>
-                        <input type="text" name="pricePerHour" id="inputPricePerHour" value="<c:out value="${param.pricePerHour}"/>" class="form-control" placeholder="Cena za hodinu">
+                        <label for="inputPricePerHour">Price per hour:</label>
+                        <input type="text" name="pricePerHour" id="inputPricePerHour" value="<c:out value="${param.pricePerHour}"/>" class="form-control" placeholder="Price per hour">
                     </div>
                     <div class="form-group">
                         <label for="inputRate">Rate:</label>
                         <input type="text" name="rate" id="inputRate" value="<c:out value="${param.rate}"/>" class="form-control" placeholder="Rate">
                     </div>
 
-                    <input type="Submit" class="btn btn-success" value="Zadat" />
+                    <input type="Submit" class="btn btn-success" value="Create" />
                 </form>
             </c:if>
         </div>

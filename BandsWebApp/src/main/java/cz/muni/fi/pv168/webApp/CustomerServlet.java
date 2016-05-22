@@ -43,7 +43,6 @@ public class CustomerServlet extends HttpServlet {
                         || phoneNumber==null || phoneNumber.length()==0
                         || name == null || name.length() == 0) {
                     request.setAttribute("chyba", "Je nutne vyplnit vsechny hodnoty!");
-                    showCustomerList(request, response);
                     break;
                 }
                 try {
@@ -73,30 +72,29 @@ public class CustomerServlet extends HttpServlet {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
                     return;
                 }
-            case "/showUpdate":
-                Long id = Long.valueOf(request.getParameter("id"));
-                Customer customer = getCustomerManager().getCustomer(id);
-                request.setAttribute("name", customer.getName());
-                request.setAttribute("phoneNumber", customer.getPhoneNumber());
-                request.setAttribute("address", customer.getAddress());
-                request.setAttribute("id",id);
-                showCustomerList(request, response);
-                return;
+            case "/edit":
+                try {
+                    Long eid = Long.valueOf(request.getParameter("id"));
+                    request.setAttribute("editCustomer", getCustomerManager().getCustomer(eid));
+                }
+                catch (Exception ex) {
+                    request.setAttribute("chyba", "ID of customer is not correct.");
+                }
+                break;
             case "/update":
                 try {
-                    id = Long.parseLong(request.getParameter("id"));
+                    Long id = Long.parseLong(request.getParameter("id"));
                     name = request.getParameter("name");
                     phoneNumber = request.getParameter("phoneNumber");
                     address = request.getParameter("address");
                     if (address==null || address.length()==0
                             || phoneNumber==null || phoneNumber.length()==0
                             || name == null || name.length() == 0) {
-                        request.setAttribute("chyba", "Je nutne vyplnit vsechny hodnoty!");
-                        showCustomerList(request, response);
-                        return;
+                        request.setAttribute("chyba", "Some field is not correctly filled.");
+                        break;
                     }
                     try {
-                        customer = getCustomerManager().getCustomer(id);
+                        Customer customer = getCustomerManager().getCustomer(id);
                         customer.setName(name);
                         customer.setPhoneNumber(phoneNumber);
                         customer.setAddress(address);
@@ -109,15 +107,15 @@ public class CustomerServlet extends HttpServlet {
                         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
                         return;
                     }
-                } catch (ServiceFailureException ex) {
-                    log.error("Cannot update customer", ex);
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
-                    return;
+                } catch (Exception ex) {
+                    request.setAttribute("chyba", "Some field is not correctly filled.");
                 }
             default:
                 log.error("Unknown action " + action);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unknown action " + action);
+                return;
         }
+        showCustomerList(request, response);
     }
 
     /**

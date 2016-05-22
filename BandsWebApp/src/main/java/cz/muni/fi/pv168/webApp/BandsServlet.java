@@ -145,7 +145,7 @@ public class BandsServlet extends HttpServlet {
                     }
                 }
                 catch(Exception ex) {
-                    request.setAttribute("chyba", "Je nutné vyplniť všetky hodnoty správne!");
+                    request.setAttribute("chyba", "Some field is not correctly filled.");
                     break;
                 }
             case "/delete":
@@ -166,7 +166,7 @@ public class BandsServlet extends HttpServlet {
                     request.setAttribute("editBand", getBandManager().findBandById(eid));
                 }
                 catch (Exception ex) {
-                    request.setAttribute("chyba", "ID kapely nie je platné!");
+                    request.setAttribute("chyba", "ID of band is not correct.");
                 }
                 break;
             case "/update":
@@ -210,7 +210,7 @@ public class BandsServlet extends HttpServlet {
                     }
                 }
                 catch(Exception ex) {
-                    request.setAttribute("chyba", "Je nutné vyplniť všetky hodnoty správne!");
+                    request.setAttribute("chyba", "Some field is not correctly filled.");
                     break;
                 }
             default:
