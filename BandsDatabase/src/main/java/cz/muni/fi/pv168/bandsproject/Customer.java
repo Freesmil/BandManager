@@ -4,7 +4,7 @@ package cz.muni.fi.pv168.bandsproject;
  * Created by Lenka on 9.3.2016.
  */
 public class Customer {
-    private Long id;
+    private Long id = null;
     private String name;
     private String phoneNumber;
     private String address;

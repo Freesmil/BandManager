@@ -6,7 +6,7 @@ import java.util.Date;
  * Created by Lenka on 9.3.2016.
  */
 public class Lease {
-    private Long id;
+    private Long id = null;
     private Customer customer;
     private Band band;
     private Date date;

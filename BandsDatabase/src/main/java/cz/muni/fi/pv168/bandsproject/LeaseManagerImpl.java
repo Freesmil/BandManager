@@ -28,7 +28,9 @@ public class LeaseManagerImpl implements LeaseManager{
             log.log(Level.SEVERE, "Lease exception: Lease id must be null");
             throw new LeaseException("Lease id must be null");
         }
-        lease.setId(DBUtilsLease.getNextId(collection));
+        if (lease.getId() == null) {
+            lease.setId(DBUtilsLease.getNextId(collection));
+        }
         try {
             String xQuery = "let $doc := doc($document)" +
                     "return update insert element lease{ " +
@@ -54,7 +56,7 @@ public class LeaseManagerImpl implements LeaseManager{
             throw new DBException("Error while creating new lease", ex);
         }
 
-        DBUtilsLease.incrementId(collection, lease.getId());
+        DBUtilsLease.incrementId(collection, Long.max(lease.getId(), DBUtilsLease.getNextId(collection)));
     }
 
     @Override

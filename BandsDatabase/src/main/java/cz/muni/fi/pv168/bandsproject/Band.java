@@ -6,7 +6,7 @@ import java.util.List;
  * Created by Lenka on 9.3.2016.
  */
 public class Band {
-    private Long id;
+    private Long id = null;
     private String bandName;
     private List<Style> styles;
     private Region region;

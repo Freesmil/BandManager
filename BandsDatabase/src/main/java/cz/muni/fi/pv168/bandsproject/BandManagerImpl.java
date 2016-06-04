@@ -31,7 +31,9 @@ public class BandManagerImpl implements BandManager{
             log.log(Level.SEVERE, "Band exception: Band id must be null");
             throw new BandException("Band id must be null");
         }
-        band.setId(DBUtilsBand.getNextId(collection));
+        if (band.getId() == null) {
+            band.setId(DBUtilsBand.getNextId(collection));
+        }
         try {
             String xQuery = "let $doc := doc($document) " +
                     "return update insert element band{ " +
@@ -61,7 +63,7 @@ public class BandManagerImpl implements BandManager{
             throw new DBException("Error while creating new band", ex);
         }
 
-        DBUtilsBand.incrementId(collection, band.getId());
+        DBUtilsBand.incrementId(collection, Long.max(band.getId(), DBUtilsBand.getNextId(collection)));
     }
     
     @Override

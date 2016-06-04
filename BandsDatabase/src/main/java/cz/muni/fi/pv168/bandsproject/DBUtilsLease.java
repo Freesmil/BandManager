@@ -300,6 +300,20 @@ public class DBUtilsLease {
         parent.close();
     }
 
-    public static void createIfNotExistsLeaseResource() {
+    public static void createIfNotExistsLeaseResource()  throws IllegalAccessException, InstantiationException, ClassNotFoundException, XMLDBException {
+        Properties configProperty = new ConfigProperty();
+        Collection collection = DBUtils.loadOrCreateDatabaseCollection();
+
+        XMLResource resource = (XMLResource)collection.getResource(configProperty.getProperty("db_leaseResourceName"));
+        if (resource == null) {
+            resource = (XMLResource) collection.createResource(configProperty.getProperty("db_leaseResourceName"), "XMLResource");
+            resource.setContent("<leases></leases>");
+            collection.storeResource(resource);
+
+            resource = (XMLResource) collection.createResource(configProperty.getProperty("db_metaDataL"), "XMLResource");
+            resource.setContent("<dataL><lease-next-id>1</lease-next-id></dataL>");
+            collection.storeResource(resource);
+
+        }
     }
 }

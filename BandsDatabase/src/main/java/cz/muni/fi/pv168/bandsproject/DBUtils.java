@@ -194,7 +194,7 @@ public class DBUtils {
         Properties configProperty = new ConfigProperty();
         Collection collection = loadOrCreateDatabaseCollection();
 
-        XMLResource resource = (XMLResource)collection.getResource(configProperty.getProperty("db_bandResourceName"));
+        XMLResource resource = (XMLResource)collection.getResource(configProperty.getProperty("db_customerResourceName"));
         if (resource == null) {
             resource = (XMLResource) collection.createResource(configProperty.getProperty("db_customerResourceName"), "XMLResource");
             resource.setContent("<customers></customers>");

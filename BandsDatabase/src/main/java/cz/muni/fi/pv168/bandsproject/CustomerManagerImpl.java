@@ -27,7 +27,9 @@ public class CustomerManagerImpl implements CustomerManager {
             log.log(Level.SEVERE, "Customer exception: Customer id must be null");
             throw new CustomerException("Customer id must be null");
         }
-        customer.setId(DBUtils.getNextId(collection));
+        if (customer.getId() == null) {
+            customer.setId(DBUtils.getNextId(collection));
+        }
         try {
             String xQuery = "let $doc := doc($document)" +
                     "return update insert element customer{ " +
@@ -51,7 +53,7 @@ public class CustomerManagerImpl implements CustomerManager {
             throw new DBException("Error while creating new customer", ex);
         }
 
-        DBUtils.incrementId(collection, customer.getId());
+        DBUtils.incrementId(collection, Long.max(customer.getId(),DBUtils.getNextId(collection)));
     }
 
     @Override
