@@ -61,7 +61,23 @@
         </div>
         <div class="col-md-6">
             <h2>Import</h2>
-            <form action="${pageContext.request.contextPath}/xml/import" method="post">
+            <c:if test="${not empty chyba}">
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    <c:out value="${chyba}"/>
+                </div>
+            </c:if>
+
+            <c:if test="${not empty success}">
+                <div class="alert alert-success" role="alert">
+                    <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                    <span class="sr-only">Succes:</span>
+                    <c:out value="${success}"/>
+                </div>
+            </c:if>
+
+            <form action="${pageContext.request.contextPath}/xml/import" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="importFile">File:</label>
                     <input type="file" id="importFile" name="file">

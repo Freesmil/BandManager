@@ -7,7 +7,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -15,16 +19,22 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
 
 /**
  *
@@ -41,6 +51,12 @@ public class XmlServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if (request.getParameter("success") != null) {
+            request.setAttribute("success", request.getParameter("success"));
+        }
+        if (request.getParameter("error") != null) {
+            request.setAttribute("chyba", request.getParameter("error"));
+        }
         request.getRequestDispatcher(LIST_JSP).forward(request, response);
     }
 
@@ -53,14 +69,45 @@ public class XmlServlet extends HttpServlet {
                 Part filePart = request.getPart("file");
                 InputStream fileContent = filePart.getInputStream();
 
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = fileContent.read(buffer)) > -1 ) {
+                    baos.write(buffer, 0, len);
+                }
+                baos.flush();
+
+                InputStream streamForSchema = new ByteArrayInputStream(baos.toByteArray());
+                InputStream streamForXml = new ByteArrayInputStream(baos.toByteArray());
+
+                try {
+                    SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                    ServletContext context = getServletContext();
+                    Schema schema = sf.newSchema(context.getResource("/schema.xsd"));
+
+                    DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
+                    dbf.setNamespaceAware(true);
+
+                    dbf.setSchema(schema);
+                    DocumentBuilder docBuilder = dbf.newDocumentBuilder();
+
+                    Document doc = docBuilder.parse(streamForSchema);
+                } catch (SAXException ex) {
+                    response.sendRedirect(request.getContextPath()+URL_MAPPING+"?error="+ex.getMessage());
+                    break;
+                } catch (ParserConfigurationException ex) {
+                    response.sendRedirect(request.getContextPath()+URL_MAPPING+"?error="+ex.getMessage());
+                    break;
+                }
+
                 try
                 {
                     DocumentBuilderFactory docFactoryImport = DocumentBuilderFactory.newInstance();
                     DocumentBuilder docBuilderImport = docFactoryImport.newDocumentBuilder();
-                    Document docImport = docBuilderImport.parse(fileContent);
+                    Document docImport = docBuilderImport.parse(streamForXml);
 
                     BandManager bandManager = getBandManager();
-                    for (Node bandElement : new Nodes(docImport.getElementsByTagName("bands"))) {
+                    for (Node bandElement : new Nodes(docImport.getElementsByTagName("band"))) {
                         Band band = new Band();
 
                         Node bandId = bandElement.getAttributes().getNamedItem("id");
@@ -75,8 +122,11 @@ public class XmlServlet extends HttpServlet {
                                     break;
                                 case "styles":
                                     List<Style> styles = new ArrayList<>();
-                                    for (Node styleElement : new Nodes(bandChildElement.getChildNodes())) {
-                                        styles.add(Style.valueOf(styleElement.getTextContent()));
+                                    Set<Node> stylesSet = new Nodes(bandChildElement.getChildNodes());
+                                    for (Node styleElement : stylesSet) {
+                                        if (styleElement.getNodeName().equals("style")) {
+                                            styles.add(Style.valueOf(styleElement.getTextContent()));
+                                        }
                                     }
                                     band.setStyles(styles);
                                     break;
@@ -96,7 +146,7 @@ public class XmlServlet extends HttpServlet {
                     }
 
                     CustomerManager customerManager = getCustomerManager();
-                    for (Node customerElement : new Nodes(docImport.getElementsByTagName("customers"))) {
+                    for (Node customerElement : new Nodes(docImport.getElementsByTagName("customer"))) {
                         Customer customer = new Customer();
 
                         Node bandId = customerElement.getAttributes().getNamedItem("id");
@@ -122,7 +172,7 @@ public class XmlServlet extends HttpServlet {
                     }
 
                     LeaseManager leaseManager = getLeaseManager();
-                    for (Node leaseElement : new Nodes(docImport.getElementsByTagName("leases"))) {
+                    for (Node leaseElement : new Nodes(docImport.getElementsByTagName("lease"))) {
                         Lease lease = new Lease();
 
                         Node bandId = leaseElement.getAttributes().getNamedItem("id");
@@ -139,7 +189,7 @@ public class XmlServlet extends HttpServlet {
                                     lease.setBand(getBandManager().findBandById(Long.valueOf(leaseChildElement.getTextContent())));
                                     break;
                                 case "date":
-                                    DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                                    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                                     lease.setDate(formatter.parse(leaseChildElement.getTextContent()));
                                     break;
                                 case "place":
@@ -160,9 +210,8 @@ public class XmlServlet extends HttpServlet {
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Cannot import xml");
                 }
 
-
-
-                request.getRequestDispatcher(LIST_JSP).forward(request, response);
+                response.sendRedirect(request.getContextPath()+URL_MAPPING+"?success=Successfully%20imported");
+                break;
             case "/export":
                 boolean bands = false;
                 boolean leases = false;
@@ -184,7 +233,7 @@ public class XmlServlet extends HttpServlet {
                 try
                 {
                     OutputStream outputStream = response.getOutputStream();
-                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
 
                     DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
                     DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -264,7 +313,7 @@ public class XmlServlet extends HttpServlet {
                             leaseElement.appendChild(bandId);
 
                             Element date = doc.createElement("date");
-                            DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                            DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                             date.appendChild(doc.createTextNode(formatter.format(lease.getDate())));
                             leaseElement.appendChild(date);
 
@@ -281,6 +330,8 @@ public class XmlServlet extends HttpServlet {
 
                     TransformerFactory transformerFactory = TransformerFactory.newInstance();
                     Transformer transformer = transformerFactory.newTransformer();
+                    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                    transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
                     DOMSource source = new DOMSource(doc);
 
                     StreamResult result = new StreamResult(writer);
@@ -294,6 +345,7 @@ public class XmlServlet extends HttpServlet {
                     log.error("Cannot generate xml file for export: " + e.getMessage());
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Cannot generate xml");
                 }
+                break;
             default:
                 log.error("Unknown action " + action);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unknown action " + action);

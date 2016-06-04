@@ -36,7 +36,7 @@ public class LeaseServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("utf-8");
-        DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
         String action = request.getPathInfo();
         switch (action) {
@@ -61,6 +61,7 @@ public class LeaseServlet extends HttpServlet {
                     request.setAttribute("leases", collection);
                     request.setAttribute("bands", getBandsManager().getAllBands());
                     request.setAttribute("customers", getCustomersManager().getAllCustomers());
+                    request.setAttribute("regions", Region.values());
                     request.getRequestDispatcher(LIST_JSP).forward(request, response);
                 } catch (Exception e) {
                     log.error("Cannot filter bands", e);
@@ -210,6 +211,7 @@ public class LeaseServlet extends HttpServlet {
             request.setAttribute("leases", getLeasesManager().findAllLeases());
             request.setAttribute("bands", getBandsManager().getAllBands());
             request.setAttribute("customers", getCustomersManager().getAllCustomers());
+            request.setAttribute("regions", Region.values());
             request.getRequestDispatcher(LIST_JSP).forward(request, response);
         } catch (Exception e) {
             log.error("Cannot show leases", e);

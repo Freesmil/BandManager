@@ -27,10 +27,6 @@ public class BandManagerImpl implements BandManager{
     public void createBand(Band band) throws ServiceFailureException {
         validate(band);
         log.log(Level.INFO, "Create band in band manager: " + band);
-        if(band.getId() != null){
-            log.log(Level.SEVERE, "Band exception: Band id must be null");
-            throw new BandException("Band id must be null");
-        }
         if (band.getId() == null) {
             band.setId(DBUtilsBand.getNextId(collection));
         }

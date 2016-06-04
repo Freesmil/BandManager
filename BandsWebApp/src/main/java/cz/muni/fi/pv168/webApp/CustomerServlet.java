@@ -1,8 +1,6 @@
 package cz.muni.fi.pv168.webApp;
 
-import cz.muni.fi.pv168.bandsproject.Customer;
-import cz.muni.fi.pv168.bandsproject.CustomerManager;
-import cz.muni.fi.pv168.bandsproject.ServiceFailureException;
+import cz.muni.fi.pv168.bandsproject.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +61,12 @@ public class CustomerServlet extends HttpServlet {
             case "/delete":
                 try {
                     Long id = Long.valueOf(request.getParameter("id"));
-                    getCustomerManager().deleteCustomer(getCustomerManager().getCustomer(id));
+                    Customer customer = getCustomerManager().getCustomer(id);
+                    LeaseManager leaseManager = getLeasesManager();
+                    for (Lease lease : leaseManager.findLeasesForCustomer(customer)) {
+                        leaseManager.deleteLease(lease);
+                    }
+                    getCustomerManager().deleteCustomer(customer);
                     log.debug("deleted customer {}",id);
                     response.sendRedirect(request.getContextPath()+URL_MAPPING);
                     return;
@@ -126,6 +129,16 @@ public class CustomerServlet extends HttpServlet {
     private CustomerManager getCustomerManager() {
         return (CustomerManager) getServletContext().getAttribute("customerManager");
     }
+
+    /**
+     * Gets LeaseManager from ServletContext, where it was stored by {@link StartListener}.
+     *
+     * @return LeaseManager instance
+     */
+    private LeaseManager getLeasesManager() {
+        return (LeaseManager) getServletContext().getAttribute("leaseManager");
+    }
+
 
     /**
      * Stores the list of customers to request attribute "customers" and forwards to the JSP to display it.

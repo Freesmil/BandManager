@@ -24,10 +24,6 @@ public class LeaseManagerImpl implements LeaseManager{
     public void createLease(Lease lease) throws ServiceFailureException {
         validate(lease);
         log.log(Level.INFO, "Create lease in lease manager: " + lease);
-        if(lease.getId() != null){
-            log.log(Level.SEVERE, "Lease exception: Lease id must be null");
-            throw new LeaseException("Lease id must be null");
-        }
         if (lease.getId() == null) {
             lease.setId(DBUtilsLease.getNextId(collection));
         }

@@ -37,10 +37,10 @@ public class DBUtilsLease {
 
         if(condition != null && !condition.isEmpty()) {
             xQuery = "let $doc := doc($document) " +
-                    "return $doc/bands/lease[" + condition + "]";
+                    "return $doc/leases/lease[" + condition + "]";
         }else{
             xQuery = "let $doc := doc($document) " +
-                    "return $doc/bands/lease";
+                    "return $doc/leases/lease";
         }
 
         XQueryService service = (XQueryService) collection.getService("XQueryService", "1.0");

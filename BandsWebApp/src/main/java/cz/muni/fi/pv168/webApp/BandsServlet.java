@@ -151,7 +151,12 @@ public class BandsServlet extends HttpServlet {
             case "/delete":
                 try {
                     Long id = Long.valueOf(request.getParameter("id"));
-                    getBandManager().deleteBand(getBandManager().findBandById(id));
+                    Band band = getBandManager().findBandById(id);
+                    LeaseManager leaseManager = getLeasesManager();
+                    for (Lease lease : leaseManager.findLeasesForBand(band)) {
+                        leaseManager.deleteLease(lease);
+                    }
+                    getBandManager().deleteBand(band);
                     log.debug("deleted band {}",id);
                     response.sendRedirect(request.getContextPath()+URL_MAPPING);
                     return;
@@ -228,6 +233,15 @@ public class BandsServlet extends HttpServlet {
      */
     private BandManager getBandManager() {
         return (BandManager) getServletContext().getAttribute("bandManager");
+    }
+
+    /**
+     * Gets LeaseManager from ServletContext, where it was stored by {@link StartListener}.
+     *
+     * @return LeaseManager instance
+     */
+    private LeaseManager getLeasesManager() {
+        return (LeaseManager) getServletContext().getAttribute("leaseManager");
     }
 
     /**

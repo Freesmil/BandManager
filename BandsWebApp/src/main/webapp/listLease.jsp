@@ -47,47 +47,26 @@
         <div class="col-md-8">
             <h2>Filter <a href="#filters" class="filtersButton"><span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span></a></h2>
             <div style="display: none" class="filterWindow">
-                <form action="${pageContext.request.contextPath}/bands/filter" method="post">
+                <form action="${pageContext.request.contextPath}/leases/filter" method="post">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="filterName">Name:</label>
-                                <input type="text" name="name" id="filterName" value="" class="form-control" placeholder="Name">
-                            </div>
-                            <div class="form-group">
-                                <label for="filterStyles">Styles:</label>
-                                <select id="filterStyles" multiple class="form-control" name="styles">
-                                    <c:forEach items="${styles}" var="style">
-                                        <option>${style.name()}</option>
+                                <label for="filterBand">Band:</label>
+                                <select id="filterBand" class="form-control" name="bandId">
+                                    <c:forEach items="${bands}" var="band">
+                                        <option value="${band.id}">${band.name}</option>
                                     </c:forEach>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="filterRegion">Region:</label>
-                                <select id="filterRegion" class="form-control" name="region">
-                                    <option>-</option>
-                                    <c:forEach items="${regions}" var="region">
-                                        <option>${region.name()}</option>
+                                <label for="filterCustomer">Customer:</label>
+                                <select id="filterCustomer" class="form-control" name="customerId">
+                                    <c:forEach items="${customers}" var="customer">
+                                        <option value="${customer.id}">${customer.name}</option>
                                     </c:forEach>
                                 </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="filterRate">Minimal rate:</label>
-                                <input type="text" name="rate" id="filterRate" value="" class="form-control" placeholder="Minimal rate">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="filterPricePerHourFrom">Price per hour from:</label>
-                                <input type="text" name="pricePerHourFrom" id="filterPricePerHourFrom" value="" class="form-control" placeholder="Price per hour from">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="filterPricePerHourTo">Price per hour to:</label>
-                                <input type="text" name="pricePerHourTo" id="filterPricePerHourTo" value="" class="form-control" placeholder="Price per hour to">
                             </div>
                         </div>
                     </div>
@@ -95,26 +74,26 @@
                     <input type="Submit" class="btn btn-default" value="Filter"/>
                 </form>
             </div>
-            <h2>Bands list</h2>
+            <h2>List of leases</h2>
             <table class="table">
                 <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Styles</th>
-                    <th>Region</th>
-                    <th>Price per hour</th>
-                    <th>Rate</th>
+                    <th>Customer</th>
+                    <th>Band</th>
+                    <th>Date</th>
+                    <th>Place</th>
+                    <th>Duration</th>
                 </tr>
                 </thead>
-                <c:forEach items="${bands}" var="band">
+                <c:forEach items="${leases}" var="lease">
                     <tr>
-                        <td align="left"><c:out value="${band.name}"/></td>
-                        <td align="center"><c:out value="${band.styles.toString()}"/></td>
-                        <td align="center"><c:out value="${band.region}"/></td>
-                        <td align="center"><c:out value="${band.pricePerHour}"/></td>
-                        <td align="center"><c:out value="${band.rate}"/></td>
-                        <td align="right"><form method="post" action="${pageContext.request.contextPath}/bands/edit?id=${band.id}"><input type="submit" value="Edit" class="btn btn-info"></form></td>
-                        <td align="right"><form method="post" action="${pageContext.request.contextPath}/bands/delete?id=${band.id}"><input type="submit" value="Remove" class="btn btn-danger"></form></td>
+                        <td align="left"><c:out value="${lease.customer.name}"/></td>
+                        <td align="center"><c:out value="${lease.band.name}"/></td>
+                        <td align="center"><c:out value="${lease.date}"/></td>
+                        <td align="center"><c:out value="${lease.place}"/></td>
+                        <td align="center"><c:out value="${lease.duration}"/></td>
+                        <td align="right"><form method="post" action="${pageContext.request.contextPath}/leases/edit?id=${lease.id}"><input type="submit" value="Edit" class="btn btn-info"></form></td>
+                        <td align="right"><form method="post" action="${pageContext.request.contextPath}/leases/delete?id=${lease.id}"><input type="submit" value="Remove" class="btn btn-danger"></form></td>
                     </tr>
                 </c:forEach>
             </table>
@@ -122,11 +101,11 @@
 
         <div class="col-md-4">
 
-            <c:if test="${not empty editBand}">
-                <h2>Edit band</h2>
+            <c:if test="${not empty editLease}">
+                <h2>Edit lease</h2>
             </c:if>
-            <c:if test="${empty editBand}">
-                <h2>New band</h2>
+            <c:if test="${empty editLease}">
+                <h2>New lease</h2>
             </c:if>
             <c:if test="${not empty chyba}">
                 <div class="alert alert-danger" role="alert">
@@ -136,73 +115,80 @@
                 </div>
             </c:if>
 
-            <c:if test="${not empty editBand}">
-                <form action="${pageContext.request.contextPath}/bands/update" method="post" id="editForm">
-                    <input type="hidden" name="id" value="${editBand.id}">
+            <c:if test="${not empty editLease}">
+                <form action="${pageContext.request.contextPath}/leases/update" method="post" id="editForm">
+                    <input type="hidden" name="id" value="${editLease.id}">
                     <div class="form-group">
-                        <label for="uinputName">Name:</label>
-                        <input type="text" name="name" id="uinputName" value="<c:out value="${editBand.name}"/>" class="form-control" placeholder="Name">
-                    </div>
-                    <div class="form-group">
-                        <label for="uinputStyles">Styles:</label>
-                        <select id="uinputStyles" multiple class="form-control" name="styles">
-                            <c:forEach items="${styles}" var="style">
-                                <option <c:if test="${editBand.styles.contains(style)}">selected</c:if>>${style.name()}</option>
+                        <label for="uinputCustomer">Customer:</label>
+                        <select id="uinputCustomer" class="form-control" name="customerId">
+                            <c:forEach items="${customers}" var="customer">
+                                <option value="${customer.id}" <c:if test="${editLease.customer.id == customer.id}">selected</c:if>>${customer.name}</option>
                             </c:forEach>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="uinputRegion">Region:</label>
-                        <select id="uinputRegion" class="form-control" name="region">
-                            ${editBand.region}
+                        <label for="uinputBand">Band:</label>
+                        <select id="uinputBand" class="form-control" name="bandId">
+                            <c:forEach items="${bands}" var="band">
+                                <option value="${band.id}" <c:if test="${editLease.band.id == band.id}">selected</c:if>>${band.name}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="uinputDate">Date:</label>
+                        <input type="date" name="date" id="uinputDate" value="<c:out value="${editLease.date}"/>" class="form-control" placeholder="Date">
+                    </div>
+                    <div class="form-group">
+                        <label for="uinputRegion">Place:</label>
+                        <select id="uinputRegion" class="form-control" name="place">
                             <c:forEach items="${regions}" var="region">
-                                <option <c:if test="${editBand.region == region}">selected</c:if>>${region.name()}</option>
+                                <option <c:if test="${editLease.place == region}">selected</c:if>>${region.name()}</option>
                             </c:forEach>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="uinputPricePerHour">Price per hour:</label>
-                        <input type="text" name="pricePerHour" id="uinputPricePerHour" value="<c:out value="${editBand.pricePerHour}"/>" class="form-control" placeholder="Price per hour">
-                    </div>
-                    <div class="form-group">
-                        <label for="uinputRate">Rate:</label>
-                        <input type="text" name="rate" id="uinputRate" value="<c:out value="${editBand.rate}"/>" class="form-control" placeholder="Rate">
+                        <label for="uinputDuration">Duration:</label>
+                        <input type="text" name="duration" id="uinputDuration" value="<c:out value="${editLease.duration}"/>" class="form-control" placeholder="Duration">
                     </div>
 
                     <input type="Submit" class="btn btn-success" value="Save" />
-                    <a href="${pageContext.request.contextPath}/bands/" class="btn btn-warning">Cancel</a>
+                    <a href="${pageContext.request.contextPath}/leases/" class="btn btn-warning">Cancel</a>
                 </form>
             </c:if>
 
-            <c:if test="${empty editBand}">
-                <form action="${pageContext.request.contextPath}/bands/add" method="post" id="editForm">
+            <c:if test="${empty editLease}">
+                <form action="${pageContext.request.contextPath}/leases/add" method="post" id="editForm">
                     <div class="form-group">
-                        <label for="inputName">Name:</label>
-                        <input type="text" name="name" id="inputName" value="<c:out value="${param.name}"/>" class="form-control" placeholder="Name">
-                    </div>
-                    <div class="form-group">
-                        <label for="inputStyles">Styles:</label>
-                        <select id="inputStyles" multiple class="form-control" name="styles">
-                            <c:forEach items="${styles}" var="style">
-                                <option>${style.name()}</option>
+                        <label for="inputCustomer">Customer:</label>
+                        <select id="inputCustomer" class="form-control" name="customerId">
+                            <c:forEach items="${customers}" var="customer">
+                                <option value="${customer.id}">${customer.name}</option>
                             </c:forEach>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="inputRegion">Region:</label>
-                        <select id="inputRegion" class="form-control" name="region">
+                        <label for="inputBand">Band:</label>
+                        <select id="inputBand" class="form-control" name="bandId">
+                            <c:forEach items="${bands}" var="band">
+                                <option value="${band.id}">${band.name}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputDate">Date:</label>
+                        <input type="date" name="date" id="inputDate" class="form-control" placeholder="Date">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputRegion">Place:</label>
+                        <select id="inputRegion" class="form-control" name="place">
                             <c:forEach items="${regions}" var="region">
-                                <option>${region.name()}</option>
+                                <option >${region.name()}</option>
                             </c:forEach>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="inputPricePerHour">Price per hour:</label>
-                        <input type="text" name="pricePerHour" id="inputPricePerHour" value="<c:out value="${param.pricePerHour}"/>" class="form-control" placeholder="Price per hour">
-                    </div>
-                    <div class="form-group">
-                        <label for="inputRate">Rate:</label>
-                        <input type="text" name="rate" id="inputRate" value="<c:out value="${param.rate}"/>" class="form-control" placeholder="Rate">
+                        <label for="inputDuration">Duration:</label>
+                        <input type="text" name="duration" id="inputDuration" class="form-control" placeholder="Duration">
                     </div>
 
                     <input type="Submit" class="btn btn-success" value="Create" />

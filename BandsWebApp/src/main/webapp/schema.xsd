@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            elementFormDefault="qualified">
+    <xsd:simpleType name="notEmptyString">
+        <xsd:restriction base="xsd:string">
+            <xsd:minLength value="1"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="decimal">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[1-9][0-9]*\.[0-9]+"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="integer">
+        <xsd:restriction base="xsd:string">
+            <xsd:pattern value="[0-9]*"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:complexType name="bands">
+        <xsd:sequence>
+            <xsd:element name="band" minOccurs="0" maxOccurs="unbounded" type="band"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="customers">
+        <xsd:sequence>
+            <xsd:element name="customer" minOccurs="0" maxOccurs="unbounded" type="customer"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="leases">
+        <xsd:sequence>
+            <xsd:element name="lease" minOccurs="0" maxOccurs="unbounded" type="lease"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="band">
+        <xsd:sequence>
+            <xsd:element name="name" type="notEmptyString" nillable="false" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="styles" type="styles" nillable="false" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="region" type="notEmptyString" nillable="false" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="pricePerHour" type="decimal" nillable="false" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="rate" type="decimal" nillable="false" minOccurs="1" maxOccurs="1"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:unsignedInt"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="styles">
+        <xsd:sequence>
+            <xsd:element name="style" minOccurs="0" maxOccurs="unbounded" type="notEmptyString"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="customer">
+        <xsd:sequence>
+            <xsd:element name="name" type="notEmptyString" nillable="false" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="phoneNumber" type="notEmptyString" nillable="false" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="address" type="notEmptyString" nillable="false" minOccurs="1" maxOccurs="1"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:unsignedInt"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="lease">
+        <xsd:sequence>
+            <xsd:element name="customerId" type="integer" nillable="false" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="bandId" type="integer" nillable="false" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="date" type="notEmptyString" nillable="false" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="place" type="notEmptyString" nillable="false" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="duration" type="integer" nillable="false" minOccurs="1" maxOccurs="1"/>
+        </xsd:sequence>
+        <xsd:attribute name="id" type="xsd:unsignedInt"/>
+    </xsd:complexType>
+
+    <xsd:element name="data">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="bands" minOccurs="0" maxOccurs="1" type="bands"/>
+                <xsd:element name="customers" minOccurs="0" maxOccurs="1" type="customers"/>
+                <xsd:element name="leases" minOccurs="0" maxOccurs="1" type="leases"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>
